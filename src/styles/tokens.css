@@ -1,0 +1,77 @@
+/* src/styles/tokens.css
+   BlackGold design tokens — imported in main.jsx */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --gold:         #C9A84C;
+  --gold-light:   #E2C47A;
+  --gold-dark:    #9B7A2E;
+  --gold-dim:     rgba(201, 168, 76, 0.13);
+  --gold-border:  rgba(201, 168, 76, 0.22);
+  --gold-strong:  rgba(201, 168, 76, 0.45);
+  --gold-subtle:  rgba(201, 168, 76, 0.08);
+
+  --bg-app:       #0f0f0f;
+  --bg-surface:   #171717;
+  --bg-card:      #1e1e1e;
+  --bg-card2:     #252525;
+
+  --text-1:       #F0E6CC;
+  --text-2:       #A89060;
+  --text-3:       #967843;
+  --text-4:       #3A2A10;
+
+  --win:          #5DBF6A;
+  --loss:         #CF5F5F;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--bg-app);
+  color: var(--text-1);
+  font-family: 'Inter', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* Hide scrollbar but keep scroll */
+.scroll-hide::-webkit-scrollbar { display: none; }
+.scroll-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Dark mode scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #D5AD62 #1e1e1e;
+}
+
+*::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #D5AD62;
+  border-radius: 2px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #C9A84C;
+}
+
+/* Gold glow on active elements */
+.gold-ring {
+  border: 1.5px solid var(--gold);
+}
