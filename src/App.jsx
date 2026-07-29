@@ -187,6 +187,7 @@ export default function App() {
           <SettingsMenu
               open={settingsOpen}
               onClose={() => setSettingsOpen(false)}
+              currentUser={currentUser}
             />
           </div>
         </PhotoProvider>

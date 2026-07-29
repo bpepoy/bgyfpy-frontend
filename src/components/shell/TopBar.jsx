@@ -38,8 +38,17 @@ export default function TopBar({ section = 'Fantasy', onHamburger, onSettings })
         aria-label="Open settings"
         className="flex items-center justify-center rounded-lg"
       >
-        <img src="/icons/settings-icon.png" alt="Settings"
-          style={{ width: 24, height: 24, objectFit: 'contain' }} />
+        <div style={{ position:'relative' }}>
+          <img src="/icons/settings-icon.png" alt="Settings" style={{ width:36, height:36 }}/>
+          {pendingCount > 0 && (
+            <div style={{
+              position:'absolute', top:0, right:0,
+              width:8, height:8, borderRadius:'50%',
+              background:'#CF5F5F',
+              border:'1.5px solid #0f0f0f',
+          }}/>
+        )}
+      </div>
       </button>
     </div>
   )

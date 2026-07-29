@@ -233,11 +233,11 @@ export default function SettingsUploadScreen({ onBack }) {
   const CAN_UPLOAD_PUNISHMENT = ['brian','zef']
   const CATEGORIES = [
   { key:'content',          label:'Content' },
-  { key:'punishment',       label:'Punishment (Photo/Video)' },
+  { key:'punishment',       label:'Punishment' },
   { key:'ice_video',        label:'Ice Video' },
   { key:'food_review',      label:'Food Review' },
   ...(CAN_UPLOAD_PUNISHMENT.includes(user?.manager_id)
-    ? [{ key:'punishment_text', label:'Punishment (Vote)' }] : []),
+    ? [{ key:'punishment_text', label:'Add Approved Punishment' }] : []),
 ]
   const CONTENT_TAGS = [
     { key:'draft_weekend', label:'Draft Weekend' },
@@ -274,7 +274,11 @@ export default function SettingsUploadScreen({ onBack }) {
         {category === 'content' && (
           <div style={{ marginBottom:20 }}>
             <Label>Tag</Label>
-            <RadioGroup options={CONTENT_TAGS} value={tag} onChange={setTag}/>
+            <CheckboxGroup
+              options={CONTENT_TAGS}
+              value={tag ? [tag] : []}
+              onChange={(selected) => setTag(selected[selected.length - 1] || 'extra')}
+            />
           </div>
         )}
 
