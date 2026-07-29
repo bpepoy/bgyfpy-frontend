@@ -159,7 +159,7 @@ export default function HomePage() {
           }}>Est. 2007</div>
         </div>
       </div>
-
+      
       {/* Stat tiles */}
       {tiles && (
         <div style={{display:"flex", gap:10, padding:"0 14px", marginBottom:14}}>
@@ -167,25 +167,20 @@ export default function HomePage() {
             label="Total Seasons"
             value={tiles.total_seasons}
             sub={tiles.years_active}
+            noBorder
           />
           <StatTile
             label="Total Games"
             value={tiles.total_games?.toLocaleString()}
             sub="all time"
+            noBorder
           />
-        </div>
-      )}
-
-      {/* Total points banner */}
-      {tiles?.total_points && (
-        <div style={{margin:"0 14px 14px", background:"#1e1e1e", borderRadius:12,
-          border:"0.5px solid rgba(212,168,67,0.3)", padding:"12px 16px",
-          display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-          <div style={{fontSize:9, color:"#5A4828", letterSpacing:"0.1em",
-            textTransform:"uppercase"}}>Total Points Scored</div>
-          <div style={{fontSize:22, fontWeight:500, color:"#D4A843"}}>
-            {tiles.total_points?.toLocaleString()}
-          </div>
+          <StatTile
+            label="Total Points"
+            value={tiles.total_points?.toLocaleString()}
+            sub="all time"
+            noBorder
+          />
         </div>
       )}
 
