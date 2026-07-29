@@ -232,12 +232,13 @@ export default function SettingsUploadScreen({ onBack }) {
 
   const CAN_UPLOAD_PUNISHMENT = ['brian','zef']
   const CATEGORIES = [
-    { key:'content',     label:'Content' },
-    { key:'ice_video',   label:'Ice Video' },
-    { key:'food_review', label:'Food Review' },
-        ...(CAN_UPLOAD_PUNISHMENT.includes(user?.manager_id)
-      ? [{ key:'punishment_text', label:'Punishment (Vote)' }] : []),
-  ]
+  { key:'content',          label:'Content' },
+  { key:'punishment',       label:'Punishment (Photo/Video)' },
+  { key:'ice_video',        label:'Ice Video' },
+  { key:'food_review',      label:'Food Review' },
+  ...(CAN_UPLOAD_PUNISHMENT.includes(user?.manager_id)
+    ? [{ key:'punishment_text', label:'Punishment (Vote)' }] : []),
+]
   const CONTENT_TAGS = [
     { key:'draft_weekend', label:'Draft Weekend' },
     { key:'meme',          label:'Meme' },

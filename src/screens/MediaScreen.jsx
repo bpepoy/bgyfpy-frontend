@@ -571,10 +571,10 @@ function FoodReviewsTab() {
 
 // ── Bottom nav for media ──────────────────────────────────────────────────────
 const MEDIA_TABS = [
-  { key:'content',     label:'Content',    icon:'/icons/media-icon.png'      },
-  { key:'punishment',  label:'Punishment', icon:'/icons/punishment-icon.png' },
-  { key:'ice-videos',  label:'Ice Videos', icon:'/icons/ice-video-icon.png'  },
-  { key:'food-reviews',label:'Food',       icon:'/icons/food-review-icon.png'},
+  { key:'content',     label:'Content',    icon:'/icons/content-icon.png'      },
+  { key:'punishment',  label:'Punishment', icon:'/icons/punishment-icon-2.png' },
+  { key:'ice-videos',  label:'Ice Videos', icon:'/icons/ice-videos-icon.png'  },
+  { key:'food-reviews',label:'Food',       icon:'/icons/food-reviews-icon.png'},
 ]
 
 function MediaBottomNav({ active, onTab }) {
