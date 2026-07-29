@@ -574,7 +574,7 @@ const MEDIA_TABS = [
   { key:'content',     label:'Content',    icon:'/icons/content-icon.png'      },
   { key:'punishment',  label:'Punishment', icon:'/icons/punishment-icon-2.png' },
   { key:'ice-videos',  label:'Ice Videos', icon:'/icons/ice-videos-icon.png'  },
-  { key:'food-reviews',label:'Food',       icon:'/icons/food-reviews-icon.png'},
+  { key:'food-reviews',label:'Food Reviews',       icon:'/icons/food-reviews-icon.png'},
 ]
 
 function MediaBottomNav({ active, onTab }) {
@@ -590,20 +590,8 @@ function MediaBottomNav({ active, onTab }) {
           <button key={tab.key} onClick={() => onTab(tab.key)}
             className="flex flex-col items-center gap-1"
             style={{ flex:1 }} aria-label={tab.label}>
-            <div style={{ width:36, height:36, borderRadius:8,
-              background:isActive?GOLD_DIM:'transparent',
-              display:'flex', alignItems:'center', justifyContent:'center',
-              border:isActive?`1.5px solid ${GOLD}`:`0.5px solid ${GOLD_BORDER}`,
-              position:'relative' }}>
-              <img src={tab.icon} alt={tab.label}
-                style={{ width:20, height:20, objectFit:'contain',
-                  opacity:isActive?1:0.4 }}/>
-              {isActive && (
-                <div style={{ position:'absolute', width:4, height:4,
-                  background:GOLD, borderRadius:'50%',
-                  bottom:-8, left:'50%', transform:'translateX(-50%)' }}/>
-              )}
-            </div>
+            <img src={tab.icon} alt={tab.label}
+                style={{ width:36, height:36, objectFit:'contain', opacity: isActive ? 1 : 0.35 }}/>
             <span style={{ fontSize:7, letterSpacing:'0.06em',
               textTransform:'uppercase',
               color:isActive?GOLD:TEXT_3 }}>{tab.label}</span>
