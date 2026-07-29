@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import Avatar from '../components/Avatar'
 
 const API = "https://bgyfpy-backend.onrender.com"
 
@@ -15,27 +16,6 @@ const RED = "#CF5F5F"
 const INITIALS = {
   blake:"BJ", brian:"BP", frank:"FL", jake:"JK",
   joey:"JY", jordan:"JM", kyle:"KB", nick:"ND", rob:"RD", zef:"ZD"
-}
-
-function Avatar({ managerId, photoUrl, size = 44, borderColor = GOLD }) {
-  const initials = INITIALS[managerId] || managerId?.slice(0,2).toUpperCase() || "?"
-  return (
-    <div style={{
-      width:size, height:size, borderRadius:"50%",
-      border:`1.5px solid ${borderColor}`,
-      overflow:"hidden", flexShrink:0,
-      display:"flex", alignItems:"center", justifyContent:"center",
-      background: photoUrl ? "transparent" : GOLD_DIM,
-      fontSize:size*0.28, fontWeight:500,
-      color:GOLD, letterSpacing:"0.04em",
-    }}>
-      {photoUrl
-        ? <img src={photoUrl} alt={managerId}
-            style={{width:"100%",height:"100%",objectFit:"cover"}}/>
-        : initials
-      }
-    </div>
-  )
 }
 
 function StatTile({ label, value, sub }) {
@@ -165,7 +145,7 @@ export default function HomePage() {
         display:"flex", alignItems:"center", gap:16,
       }}>
         <img src="/icons/blackgold-logo.png" alt="BlackGold"
-          style={{width:100, height:100, borderRadius:14, flexShrink:0}}/>
+          style={{width:200, height:200, borderRadius:14, flexShrink:0}}/>
         <div style={{minWidth:0}}>
           <div style={{
             fontSize:30, fontWeight:500, color:GOLD,
@@ -189,10 +169,23 @@ export default function HomePage() {
             sub={tiles.years_active}
           />
           <StatTile
-            label="Active Members"
-            value={tiles.active_members}
-            sub={`${tiles.active_members} teams`}
+            label="Total Games"
+            value={tiles.total_games?.toLocaleString()}
+            sub="all time"
           />
+        </div>
+      )}
+
+      {/* Total points banner */}
+      {tiles?.total_points && (
+        <div style={{margin:"0 14px 14px", background:"#1e1e1e", borderRadius:12,
+          border:"0.5px solid rgba(212,168,67,0.3)", padding:"12px 16px",
+          display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+          <div style={{fontSize:9, color:"#5A4828", letterSpacing:"0.1em",
+            textTransform:"uppercase"}}>Total Points Scored</div>
+          <div style={{fontSize:22, fontWeight:500, color:"#D4A843"}}>
+            {tiles.total_points?.toLocaleString()}
+          </div>
         </div>
       )}
 

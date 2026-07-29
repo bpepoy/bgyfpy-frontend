@@ -236,7 +236,7 @@ export default function SettingsUploadScreen({ onBack }) {
     { key:'ice_video',   label:'Ice Video' },
     { key:'food_review', label:'Food Review' },
         ...(CAN_UPLOAD_PUNISHMENT.includes(user?.manager_id)
-      ? [{ key:'punishment_text', label:'Punishment (Text)' }] : []),
+      ? [{ key:'punishment_text', label:'Punishment (Vote)' }] : []),
   ]
   const CONTENT_TAGS = [
     { key:'draft_weekend', label:'Draft Weekend' },
