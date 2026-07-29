@@ -1,9 +1,8 @@
 import { useState, useEffect } from "react"
-import Avatar from '../components/Avatar'
 
 const API = "https://bgyfpy-backend.onrender.com"
 
-const GOLD = "#D5AD62"
+const GOLD = "#D4A843"
 const GOLD_DIM = "rgba(212,168,67,0.18)"
 const GOLD_BORDER = "rgba(212,168,67,0.3)"
 const BG_CARD = "#1e1e1e"
@@ -18,19 +17,40 @@ const INITIALS = {
   joey:"JY", jordan:"JM", kyle:"KB", nick:"ND", rob:"RD", zef:"ZD"
 }
 
+function Avatar({ managerId, photoUrl, size = 44, borderColor = GOLD }) {
+  const initials = INITIALS[managerId] || managerId?.slice(0,2).toUpperCase() || "?"
+  return (
+    <div style={{
+      width:size, height:size, borderRadius:"50%",
+      border:`1.5px solid ${borderColor}`,
+      overflow:"hidden", flexShrink:0,
+      display:"flex", alignItems:"center", justifyContent:"center",
+      background: photoUrl ? "transparent" : GOLD_DIM,
+      fontSize:size*0.28, fontWeight:500,
+      color:GOLD, letterSpacing:"0.04em",
+    }}>
+      {photoUrl
+        ? <img src={photoUrl} alt={managerId}
+            style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+        : initials
+      }
+    </div>
+  )
+}
+
 function StatTile({ label, value, sub }) {
   return (
     <div style={{
       flex:1, background:BG_CARD, borderRadius:10,
       border:`0.5px solid ${GOLD_BORDER}`,
-      padding:"10px 8px", textAlign:"center",
+      padding:"14px 12px", textAlign:"center",
     }}>
       <div style={{
         fontSize:10, color:TEXT_MUTED, letterSpacing:"0.1em",
         textTransform:"uppercase", marginBottom:6,
       }}>{label}</div>
-      <div style={{fontSize:26, fontWeight:500, color:GOLD, lineHeight:1}}>{value}</div>
-      {sub && <div style={{fontSize:10, color:TEXT_MUTED, marginTop:4}}>{sub}</div>}
+      <div style={{fontSize:30, fontWeight:500, color:GOLD, lineHeight:1}}>{value}</div>
+      {sub && <div style={{fontSize:9, color:TEXT_MUTED, marginTop:4}}>{sub}</div>}
     </div>
   )
 }
@@ -41,7 +61,7 @@ function ManagerCard({ data, type, punishment }) {
   const borderCol = isChamp ? GOLD : RED
   const accentCol = isChamp ? GOLD : RED
   const label = isChamp ? "2025 CHAMPION" : "2025 LAST PLACE"
-  const icon  = isChamp ? "🏆" : "💩"
+  const icon  = isChamp ? "🏆" : "💀"
   const wins   = data.wins   ?? 0
   const losses = data.losses ?? 0
   const ties   = data.ties   ?? 0
@@ -50,7 +70,7 @@ function ManagerCard({ data, type, punishment }) {
     : `${wins}–${losses}`
   const games = wins + losses + ties
   const ptsPerWk = data.points_for && games
-    ? (data.points_for / games).toFixed(1) + " PPG"
+    ? (data.points_for / games).toFixed(1) + " pts/wk"
     : null
 
   return (
@@ -73,19 +93,19 @@ function ManagerCard({ data, type, punishment }) {
         <Avatar managerId={data.manager_id} photoUrl={data.photo_url}
           size={46} borderColor={borderCol}/>
         <div style={{flex:1}}>
-          <div style={{fontSize:17, fontWeight:500, color:TEXT_PRIMARY}}>
+          <div style={{fontSize:19, fontWeight:500, color:TEXT_PRIMARY}}>
             {data.display_name}
           </div>
-          <div style={{fontSize:11, color:TEXT_SEC, marginTop:2}}>
+          <div style={{fontSize:12, color:TEXT_SEC, marginTop:2}}>
             {data.team_name}
           </div>
         </div>
         <div style={{textAlign:"right"}}>
-          <div style={{fontSize:13, fontWeight:500, color:isChamp ? GREEN : RED}}>
+          <div style={{fontSize:15, fontWeight:500, color:isChamp ? GREEN : RED}}>
             {record}
           </div>
           {ptsPerWk && (
-            <div style={{fontSize:10, color:TEXT_MUTED, marginTop:2}}>{ptsPerWk}</div>
+            <div style={{fontSize:11, color:TEXT_MUTED, marginTop:2}}>{ptsPerWk}</div>
           )}
         </div>
       </div>
@@ -141,18 +161,20 @@ export default function HomePage() {
 
       {/* Hero */}
       <div style={{
-        padding:"48px 0px 10px",
-        display:"flex", alignItems:"center", gap:0,
+        padding:"20px 16px 16px",
+        display:"flex", alignItems:"center", gap:16,
       }}>
         <img src="/icons/blackgold-logo.png" alt="BlackGold"
-          style={{width:250, height:250, borderRadius:16, flexShrink:0}}/>
-        <div>
+          style={{width:100, height:100, borderRadius:14, flexShrink:0}}/>
+        <div style={{minWidth:0}}>
           <div style={{
-            fontSize:28, fontWeight:500, color:GOLD,
+            fontSize:30, fontWeight:500, color:GOLD,
             letterSpacing:"0.04em", lineHeight:1.1,
+            whiteSpace:"nowrap", overflow:"hidden",
+            textOverflow:"ellipsis",
           }}>BLACKGOLD</div>
           <div style={{
-            fontSize:11, color:TEXT_SEC, letterSpacing:"0.14em",
+            fontSize:12, color:TEXT_SEC, letterSpacing:"0.14em",
             marginTop:6, textTransform:"uppercase",
           }}>Est. 2007</div>
         </div>

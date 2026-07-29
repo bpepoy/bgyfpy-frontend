@@ -8,7 +8,7 @@ const GOLD_BORDER = 'rgba(212,168,67,0.3)'
 const BG_CARD     = '#1e1e1e'
 const TEXT_1      = '#F0E6CC'
 const TEXT_2      = '#A89060'
-const TEXT_3      = '#5A4828'
+const TEXT_3      = '#967843'
 const GREEN       = '#5DBF6A'
 const RED         = '#CF5F5F'
 

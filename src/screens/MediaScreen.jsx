@@ -1,6 +1,17 @@
 // src/screens/MediaScreen.jsx
 import { useState, useEffect, useRef } from 'react'
 
+// Generate video thumbnail from Cloudinary video URL
+function getVideoThumb(url) {
+  if (!url) return null
+  // Replace /upload/ with /upload/so_0/ and change extension to .jpg
+  try {
+    return url
+      .replace('/upload/', '/upload/so_0,w_400,h_400,c_fill/')
+      .replace(/\.(mp4|mov|webm|avi)$/i, '.jpg')
+  } catch { return null }
+}
+
 const API         = 'https://bgyfpy-backend.onrender.com'
 const GOLD        = '#D4A843'
 const GOLD_DIM    = 'rgba(212,168,67,0.15)'
@@ -289,8 +300,13 @@ function MediaGrid({ items, onTap }) {
             cursor:'pointer', background:BG_CARD }}>
           {item.media_type === 'video' ? (
             <>
-              <video src={item.cloudinary_url} muted playsInline preload="metadata"
-                style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+              {getVideoThumb(item.cloudinary_url) ? (
+                <img src={getVideoThumb(item.cloudinary_url)} alt=""
+                  style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+              ) : (
+                <video src={item.cloudinary_url} muted playsInline preload="metadata"
+                  style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+              )}
               <div style={{ position:'absolute', top:'50%', left:'50%',
                 transform:'translate(-50%,-50%)',
                 background:'rgba(0,0,0,0.6)', borderRadius:'50%',
@@ -334,8 +350,13 @@ function FoodReviewList({ items, onTap }) {
             flexShrink:0, background:BG_CARD, position:'relative' }}>
             {item.media_type === 'video' ? (
               <>
-                <video src={item.cloudinary_url} muted preload="metadata"
-                  style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                {getVideoThumb(item.cloudinary_url) ? (
+                  <img src={getVideoThumb(item.cloudinary_url)} alt=""
+                    style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                ) : (
+                  <video src={item.cloudinary_url} muted preload="metadata"
+                    style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
+                )}
                 <div style={{ position:'absolute', inset:0, display:'flex',
                   alignItems:'center', justifyContent:'center',
                   background:'rgba(0,0,0,0.4)', fontSize:16, color:'white' }}>▶</div>
@@ -407,7 +428,7 @@ function ContentTab() {
 
   const TAGS = [
     { k:'all',           l:'All' },
-    { k:'draft_weekend', l:'Draft Weekend' },
+    { k:'draft_weekend', l:'Draft Wknd' },
     { k:'meme',          l:'Memes' },
     { k:'faceswap',      l:'Faceswap' },
     { k:'extra',         l:'Extra' },
@@ -550,10 +571,10 @@ function FoodReviewsTab() {
 
 // ── Bottom nav for media ──────────────────────────────────────────────────────
 const MEDIA_TABS = [
-  { key:'content',     label:'Content',    icon:'/icons/content-icon.png'      },
-  { key:'punishment',  label:'Punishment', icon:'/icons/punishment-icon-2.png' },
-  { key:'ice-videos',  label:'Ice Videos', icon:'/icons/ice-videos-icon.png'  },
-  { key:'food-reviews',label:'Food Reviews',       icon:'/icons/food-reviews-icon.png'},
+  { key:'content',     label:'Content',    icon:'/icons/media-icon.png'      },
+  { key:'punishment',  label:'Punishment', icon:'/icons/punishment-icon.png' },
+  { key:'ice-videos',  label:'Ice Videos', icon:'/icons/ice-video-icon.png'  },
+  { key:'food-reviews',label:'Food',       icon:'/icons/food-review-icon.png'},
 ]
 
 function MediaBottomNav({ active, onTab }) {
@@ -569,8 +590,20 @@ function MediaBottomNav({ active, onTab }) {
           <button key={tab.key} onClick={() => onTab(tab.key)}
             className="flex flex-col items-center gap-1"
             style={{ flex:1 }} aria-label={tab.label}>
-            <img src={tab.icon} alt={tab.label}
-                style={{ width:36, height:36, objectFit:'contain', opacity: isActive ? 1 : 0.35 }}/>
+            <div style={{ width:36, height:36, borderRadius:8,
+              background:isActive?GOLD_DIM:'transparent',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              border:isActive?`1.5px solid ${GOLD}`:`0.5px solid ${GOLD_BORDER}`,
+              position:'relative' }}>
+              <img src={tab.icon} alt={tab.label}
+                style={{ width:20, height:20, objectFit:'contain',
+                  opacity:isActive?1:0.4 }}/>
+              {isActive && (
+                <div style={{ position:'absolute', width:4, height:4,
+                  background:GOLD, borderRadius:'50%',
+                  bottom:-8, left:'50%', transform:'translateX(-50%)' }}/>
+              )}
+            </div>
             <span style={{ fontSize:7, letterSpacing:'0.06em',
               textTransform:'uppercase',
               color:isActive?GOLD:TEXT_3 }}>{tab.label}</span>

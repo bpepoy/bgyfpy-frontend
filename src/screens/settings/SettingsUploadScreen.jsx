@@ -10,10 +10,11 @@ const GOLD_BORDER   = 'rgba(212,168,67,0.3)'
 const BG_CARD       = '#1e1e1e'
 const TEXT_1        = '#F0E6CC'
 const TEXT_2        = '#A89060'
-const TEXT_3        = '#5A4828'
+const TEXT_3        = '#967843'
 const GREEN         = '#5DBF6A'
 const RED           = '#CF5F5F'
 
+const DEV_USER = { manager_id:'brian', display_name:'Brian' }
 
 function Label({ children }) {
   return (
@@ -96,17 +97,19 @@ function TextInput({ label, value, onChange, placeholder, multiline, type='text'
   )
 }
 
-export default function SettingsUploadScreen({ onBack, currentUser  }) {
-  const [user, setUser] = useState(currentUser)
+export default function SettingsUploadScreen({ onBack }) {
+  const user = DEV_USER
 
   const [category, setCategory] = useState('content')
-  const [tags,     setTags]     = useState([])
+  const [tag,      setTag]      = useState('extra')
   const [file,     setFile]     = useState(null)
   const [preview,  setPreview]  = useState(null)
   const [restaurant, setRestaurant] = useState('')
   const [menuItem,   setMenuItem]   = useState('')
   const [rating,     setRating]     = useState('')
   const [reviewText, setReviewText] = useState('')
+  const [punishmentText, setPunishmentText] = useState('')
+  const [punishmentYear, setPunishmentYear] = useState(new Date().getFullYear())
   const [restaurants, setRestaurants] = useState([])
   const [uploading,  setUploading]  = useState(false)
   const [status,     setStatus]     = useState(null)
@@ -127,12 +130,40 @@ export default function SettingsUploadScreen({ onBack, currentUser  }) {
   }
 
   const reset = () => {
-    setFile(null); setPreview(null); setTags([])
+    setFile(null); setPreview(null); setTag('extra')
     setRestaurant(''); setMenuItem(''); setRating(''); setReviewText('')
     setStatus(null)
   }
 
   const handleUpload = async () => {
+    // Punishment text — no file needed
+    if (category === 'punishment_text') {
+      if (!punishmentText.trim()) {
+        setStatus({ type:'error', msg:'Punishment text is required.' })
+        return
+      }
+      setUploading(true)
+      setStatus(null)
+      try {
+        await fetch(`${API}/settings/punishment`, {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            manager_id: user?.manager_id,
+            year: punishmentYear,
+            punishment: punishmentText.trim(),
+          })
+        })
+        setStatus({ type:'success', msg:'Punishment saved!' })
+        setPunishmentText('')
+      } catch(e) {
+        setStatus({ type:'error', msg:'Failed to save punishment.' })
+      } finally {
+        setUploading(false)
+      }
+      return
+    }
+
     if (!file) return
     if (category === 'food_review' && !rating) {
       setStatus({ type:'error', msg:'Rating is required for food reviews.' })
@@ -174,7 +205,7 @@ export default function SettingsUploadScreen({ onBack, currentUser  }) {
         category,
         cloudinary_url: cData.secure_url,
         cloudinary_id:  cData.public_id,
-        tags,
+        tags: tag ? [tag] : ['extra'],
         media_date:     mediaDate,
         ...(category === 'food_review' && {
           restaurant,
@@ -199,11 +230,13 @@ export default function SettingsUploadScreen({ onBack, currentUser  }) {
     }
   }
 
+  const CAN_UPLOAD_PUNISHMENT = ['brian','zef']
   const CATEGORIES = [
     { key:'content',     label:'Content' },
-    { key:'punishment',  label:'Punishment' },
     { key:'ice_video',   label:'Ice Video' },
     { key:'food_review', label:'Food Review' },
+        ...(CAN_UPLOAD_PUNISHMENT.includes(user?.manager_id)
+      ? [{ key:'punishment_text', label:'Punishment (Text)' }] : []),
   ]
   const CONTENT_TAGS = [
     { key:'draft_weekend', label:'Draft Weekend' },
@@ -239,8 +272,8 @@ export default function SettingsUploadScreen({ onBack, currentUser  }) {
         {/* Content tags */}
         {category === 'content' && (
           <div style={{ marginBottom:20 }}>
-            <Label>Tag (optional)</Label>
-            <CheckboxGroup options={CONTENT_TAGS} value={tags} onChange={setTags}/>
+            <Label>Tag</Label>
+            <RadioGroup options={CONTENT_TAGS} value={tag} onChange={setTag}/>
           </div>
         )}
 
@@ -287,8 +320,31 @@ export default function SettingsUploadScreen({ onBack, currentUser  }) {
           </>
         )}
 
-        {/* File picker */}
-        <div style={{ marginBottom:20 }}>
+        {/* Punishment text */}
+        {category === 'punishment_text' && (
+          <>
+            <div style={{ marginBottom:16 }}>
+              <Label>Season Year</Label>
+              <input type="number" value={punishmentYear}
+                onChange={e => setPunishmentYear(parseInt(e.target.value))}
+                style={{ width:'100%', padding:'10px 12px', borderRadius:10,
+                  border:`0.5px solid ${GOLD_BORDER}`, background:BG_CARD,
+                  color:TEXT_1, fontSize:13, boxSizing:'border-box' }}/>
+            </div>
+            <div style={{ marginBottom:20 }}>
+              <Label>Punishment Text *</Label>
+              <textarea value={punishmentText} onChange={e => setPunishmentText(e.target.value)}
+                placeholder="Describe the punishment…" rows={4}
+                style={{ width:'100%', padding:'10px 12px', borderRadius:10,
+                  border:`0.5px solid ${GOLD_BORDER}`, background:BG_CARD,
+                  color:TEXT_1, fontSize:13, resize:'none', boxSizing:'border-box',
+                  fontFamily:'inherit', lineHeight:1.6 }}/>
+            </div>
+          </>
+        )}
+
+        {/* File picker — not needed for punishment text */}
+        {category !== 'punishment_text' && <div style={{ marginBottom:20 }}>
           <Label>
             {category === 'ice_video' ? 'Video' : 'Photo or Video'}
           </Label>
@@ -322,7 +378,7 @@ export default function SettingsUploadScreen({ onBack, currentUser  }) {
               </div>
             )}
           </label>
-        </div>
+        </div>}
 
         {/* Status */}
         {status && (
