@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import Avatar from '../components/Avatar'
 
 const API = "https://bgyfpy-backend.onrender.com"
 
@@ -15,27 +16,6 @@ const RED = "#CF5F5F"
 const INITIALS = {
   blake:"BJ", brian:"BP", frank:"FL", jake:"JK",
   joey:"JY", jordan:"JM", kyle:"KB", nick:"ND", rob:"RD", zef:"ZD"
-}
-
-function Avatar({ managerId, photoUrl, size = 44, borderColor = GOLD }) {
-  const initials = INITIALS[managerId] || managerId?.slice(0,2).toUpperCase() || "?"
-  return (
-    <div style={{
-      width:size, height:size, borderRadius:"50%",
-      border:`1.5px solid ${borderColor}`,
-      overflow:"hidden", flexShrink:0,
-      display:"flex", alignItems:"center", justifyContent:"center",
-      background: photoUrl ? "transparent" : GOLD_DIM,
-      fontSize:size*0.28, fontWeight:500,
-      color:GOLD, letterSpacing:"0.04em",
-    }}>
-      {photoUrl
-        ? <img src={photoUrl} alt={managerId}
-            style={{width:"100%",height:"100%",objectFit:"cover"}}/>
-        : initials
-      }
-    </div>
-  )
 }
 
 function StatTile({ label, value, sub }) {
@@ -165,7 +145,7 @@ export default function HomePage() {
         alignItems:"center", gap:10,
       }}>
         <img src="/icons/blackgold-logo.png" alt="BlackGold"
-          style={{width:300, height:300, borderRadius:18}}/>
+          style={{width:250, height:250, borderRadius:18}}/>
         <div style={{textAlign:"center"}}>
           <div style={{
             fontSize:28, fontWeight:500, color:GOLD,
