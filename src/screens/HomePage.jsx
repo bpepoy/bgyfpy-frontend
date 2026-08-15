@@ -145,7 +145,7 @@ export default function HomePage() {
         alignItems:"center", gap:10,
       }}>
         <img src="/icons/blackgold-logo.png" alt="BlackGold"
-          style={{width:250, height:250, borderRadius:18}}/>
+          style={{width:240, height:240, borderRadius:18}}/>
         <div style={{textAlign:"center"}}>
           <div style={{
             fontSize:28, fontWeight:500, color:GOLD,

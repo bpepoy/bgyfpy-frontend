@@ -192,7 +192,9 @@ function OverviewTab({name}) {
         <Avatar managerId={name} photoUrl={data.photo_url} size={64}/>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontSize:20,fontWeight:500,color:TEXT_1}}>{data.display_name}</div>
-          <div style={{fontSize:11,color:TEXT_2,marginTop:3}}>{data.team_name}</div>
+          <div style={{fontSize:11,color:TEXT_2,marginTop:3,letterSpacing:'0.08em',textTransform:'uppercase'}}>
+            {data.display_name}'s Career Overview
+          </div>
           <div style={{fontSize:10,color:TEXT_3,marginTop:2}}>{data.seasons_played} seasons played</div>
         </div>
         <div style={{textAlign:'right',flexShrink:0}}>
@@ -323,7 +325,9 @@ function ResultsTab({name}) {
               accent={rsRec.win_pct>=0.5?GREEN:RED}/>
             <StatRow label="Win %" value={rsRec.win_pct!=null?`${(rsRec.win_pct*100).toFixed(1)}%`:'—'}
               sub={rsWinsRank}/>
-            <StatRow label="Avg Finish" value={rsRec.avg_finish?.toFixed(1)||'—'}/>
+            {view==='era' && rsRec.avg_finish&&(
+              <StatRow label="Avg Finish" value={rsRec.avg_finish?.toFixed(1)||'—'}/>
+            )}
             {rsRec.best_season&&(
               <StatRow label="Best Season"
                 value={`${rsRec.best_season.wins}–${rsRec.best_season.losses}`}
@@ -349,11 +353,13 @@ function ResultsTab({name}) {
               accent={rsPts.actual_vs_proj>=0?GREEN:RED}/>
             {rsPts.best_week&&(
               <StatRow label="Best Week" value={`${rsPts.best_week.points} pts`}
-                sub={`${rsPts.best_week.year} Wk ${rsPts.best_week.week}`} accent={GREEN}/>
+                sub={rsPts.best_week.year ? `${rsPts.best_week.year} Wk ${rsPts.best_week.week}` : `Wk ${rsPts.best_week.week}`}
+                accent={GREEN}/>
             )}
             {rsPts.worst_week&&(
               <StatRow label="Worst Week" value={`${rsPts.worst_week.points} pts`}
-                sub={`${rsPts.worst_week.year} Wk ${rsPts.worst_week.week}`} accent={RED}/>
+                sub={rsPts.worst_week.year ? `${rsPts.worst_week.year} Wk ${rsPts.worst_week.week}` : `Wk ${rsPts.worst_week.week}`}
+                accent={RED}/>
             )}
             {rsPts.best_season_avg&&(
               <StatRow label="Best Season Avg"
@@ -371,7 +377,9 @@ function ResultsTab({name}) {
           <Card>
             <StatRow label="Record"
               value={poRec.wins!=null?`${poRec.wins}–${poRec.losses}`:'—'}/>
-            <StatRow label="Appearances" value={poRec.appearances||'—'}/>
+            {view==='era' && (
+              <StatRow label="Appearances" value={poRec.appearances||'—'}/>
+            )}
             <StatRow label="Avg PF / Game" value={poPts.avg_pf?.toFixed(1)||'—'}
               sub={poPfRank} accent={GOLD}/>
             <StatRow label="Avg PA / Game" value={poPts.avg_pa?.toFixed(1)||'—'}/>
@@ -437,11 +445,11 @@ function ResultsTab({name}) {
                     <div>
                       <div style={{fontSize:12,color:TEXT_1,fontWeight:500}}>{p.player_name}</div>
                       <div style={{fontSize:9,color:TEXT_3}}>
-                        {p.pct_of_season ? `${p.pct_of_season}% of season` : p.approx_seasons ? `${p.approx_seasons} seasons` : ''}
+                        {p.weeks_as_starter??p.weeks_on_team??'—'} weeks
                       </div>
                     </div>
                     <div style={{fontSize:13,fontWeight:500,color:GOLD}}>
-                      {p.weeks_as_starter??p.weeks_on_team??'—'} wks
+                      {p.pct_of_season ? `${p.pct_of_season}% of season` : p.approx_seasons ? `${p.approx_seasons} seasons` : ''}
                     </div>
                   </div>
                 ))}
@@ -810,7 +818,7 @@ function MatchupsTab({name}) {
   const [yrData,setYrData]     = useState({})
   const [loading,setLoading]   = useState(false)
   const [expanded,setExpanded] = useState(null)
-
+ 
   useEffect(()=>{
     fetch(`${API}/fantasy/${name}/overview`)
       .then(r=>r.json())
@@ -821,7 +829,7 @@ function MatchupsTab({name}) {
         if (yrs.length){setSeasons(yrs);setSeason(yrs[0])}
       }).catch(()=>{})
   },[name])
-
+ 
   useEffect(()=>{
     if (eraData[era]) return
     fetch(`${API}/fantasy/${name}/matchups?era=${era}`)
@@ -829,7 +837,7 @@ function MatchupsTab({name}) {
       .then(d=>setEraData(prev=>({...prev,[era]:d})))
       .catch(()=>{})
   },[era,name])
-
+ 
   useEffect(()=>{
     if (!season||yrData[season]) return
     setLoading(true)
@@ -838,23 +846,33 @@ function MatchupsTab({name}) {
       .then(d=>{setYrData(prev=>({...prev,[season]:d}));setLoading(false)})
       .catch(()=>setLoading(false))
   },[season,name])
-
+ 
+  const [managerInfo, setManagerInfo] = useState(null)
+ 
+  useEffect(()=>{
+    fetch(`${API}/fantasy/${name}/overview`)
+      .then(r=>r.json())
+      .then(d=>setManagerInfo(d))
+      .catch(()=>{})
+  },[name])
+ 
   const eraD           = eraData[era] || {}
   const vsOpponents    = view==='era'
     ? (eraD.vs_opponents || [])
     : []
   const d              = yrData[season] || {}
   const weeklyMatchups = d.weekly_matchups || []
-
+  const myDisplayName  = managerInfo?.display_name || name
+ 
   const sortPlayers = ps => [...(ps||[])].sort((a,b)=>{
     const ai=POS_ORDER.indexOf(a.selected_position||a.position)
     const bi=POS_ORDER.indexOf(b.selected_position||b.position)
     return (ai===-1?99:ai)-(bi===-1?99:bi)
   })
-
+ 
   return (
     <div style={{paddingBottom:24}}>
-
+ 
       {/* Era / Season toggle */}
       <ViewToggle value={view} onChange={v=>{setView(v);setExpanded(null)}}/>
       {view==='era'
@@ -864,17 +882,26 @@ function MatchupsTab({name}) {
               onChange={v=>{setSeason(v);setExpanded(null)}}/>
           )
       }
-
+ 
       {/* ERA VIEW — vs opponents summary */}
       {view==='era' && (
         vsOpponents.length===0
           ? <div style={{padding:40,textAlign:'center',color:TEXT_3,fontSize:12}}>Loading…</div>
           : <>
-              <SectionLabel label="vs All Opponents"/>
-              <Card>
-                {[...vsOpponents]
+              {/* Active members first, then former */}
+              {['active','former'].map(group => {
+                const ACTIVE = ['blake','brian','frank','jake','joey','jordan','kyle','nick','rob','zef']
+                const filtered = [...vsOpponents]
+                  .filter(o => group==='active'
+                    ? ACTIVE.includes(o.manager_id)
+                    : !ACTIVE.includes(o.manager_id))
                   .sort((a,b)=>(b.combined?.wins||0)-(a.combined?.wins||0))
-                  .map((opp,i,arr)=>{
+                if (!filtered.length) return null
+                return (
+                <div key={group}>
+                  <SectionLabel label={group==='active' ? 'vs Active Members' : 'vs Former Members'}/>
+                  <Card>
+                {filtered.map((opp,i,arr)=>{
                     const rs=opp.regular_season||{}
                     const po=opp.playoffs||{}
                     const winPct=(rs.wins+rs.losses)>0?rs.wins/(rs.wins+rs.losses):null
@@ -923,7 +950,7 @@ function MatchupsTab({name}) {
               </Card>
             </>
       )}
-
+ 
       {/* SEASON VIEW — weekly matchups */}
       {view==='season' && (
         loading
@@ -945,33 +972,49 @@ function MatchupsTab({name}) {
             const oppPlayers = sortPlayers(wk.opp_roster||[])
             const maxRows    = Math.max(myPlayers.length,oppPlayers.length)
             const hasPlayers = wk.players_available&&myPlayers.length>0
-
+ 
             return (
               <div key={idx} onClick={()=>hasPlayers&&setExpanded(i=>i===idx?null:idx)}
                 style={{margin:'0 14px 8px',background:BG_CARD,borderRadius:10,
                   border:`0.5px solid ${wk.is_playoffs?'rgba(212,168,67,0.4)':GOLD_BORDER}`,
                   overflow:'hidden',cursor:hasPlayers?'pointer':'default'}}>
-                <div style={{padding:'8px 12px'}}>
-                  {/* Top line: week label + playoff badge */}
-                  <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:6}}>
+                <div style={{padding:'8px 10px'}}>
+                  {/* Week label row */}
+                  <div style={{display:'flex',alignItems:'center',
+                    justifyContent:'space-between',marginBottom:6}}>
                     <span style={{fontSize:9,color:TEXT_3}}>
-                      {wk.is_playoffs?'🏆 ':''}{wk.is_playoffs?'Playoffs':'RS'} · Wk {wk.week}
+                      {wk.is_playoffs?'🏆 Playoffs':'RS'} · Wk {wk.week}
                     </span>
                     {hasPlayers&&(
-                      <span style={{marginLeft:'auto',fontSize:10,color:TEXT_3,
+                      <span style={{fontSize:10,color:TEXT_3,
                         transform:isOpen?'rotate(180deg)':'none',
                         transition:'transform 0.2s'}}>▼</span>
                     )}
                   </div>
-                  {/* Score row: my pts | diff | opp info + pts */}
-                  <div style={{display:'flex',alignItems:'center',gap:8}}>
-                    {/* My score */}
-                    <div style={{fontSize:20,fontWeight:700,color:isWin?GREEN:RED,
-                      flexShrink:0,minWidth:52}}>
-                      {myPts?.toFixed(1)??'—'}
+                  {/* Symmetric score row */}
+                  <div style={{display:'grid',
+                    gridTemplateColumns:'1fr auto 1fr',
+                    alignItems:'center',gap:6}}>
+                    {/* Left — me */}
+                    <div style={{display:'flex',alignItems:'center',gap:7}}>
+                      <Avatar managerId={name} size={28}/>
+                      <div style={{minWidth:0}}>
+                        <div style={{fontSize:11,fontWeight:500,color:TEXT_1,
+                          overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+                          {myDisplayName}
+                        </div>
+                        <div style={{fontSize:9,color:TEXT_3,
+                          overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+                          {wk.my_team_name||''}
+                        </div>
+                        <div style={{fontSize:20,fontWeight:700,color:isWin?GREEN:RED,
+                          lineHeight:1,marginTop:2}}>
+                          {myPts?.toFixed(1)??'—'}
+                        </div>
+                      </div>
                     </div>
-                    {/* Diff */}
-                    <div style={{flex:1,textAlign:'center'}}>
+                    {/* Center — diff */}
+                    <div style={{textAlign:'center',flexShrink:0}}>
                       {diff!=null&&(
                         <div style={{fontSize:11,fontWeight:600,
                           color:diff>0?GREEN:RED}}>
@@ -979,29 +1022,28 @@ function MatchupsTab({name}) {
                         </div>
                       )}
                     </div>
-                    {/* Opponent */}
-                    <div style={{display:'flex',alignItems:'center',gap:8,flexShrink:0}}>
-                      <div style={{textAlign:'right',minWidth:0}}>
-                        <div style={{fontSize:11,color:TEXT_1,fontWeight:500,
-                          overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',
-                          maxWidth:90}}>
+                    {/* Right — opponent */}
+                    <div style={{display:'flex',alignItems:'center',
+                      gap:7,justifyContent:'flex-end'}}>
+                      <div style={{minWidth:0,textAlign:'right'}}>
+                        <div style={{fontSize:11,fontWeight:500,color:TEXT_1,
+                          overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
                           {opp.display_name}
                         </div>
-                        <div style={{fontSize:8,color:TEXT_3,
-                          overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',
-                          maxWidth:90}}>
-                          {opp.team_name}
+                        <div style={{fontSize:9,color:TEXT_3,
+                          overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+                          {opp.team_name||''}
+                        </div>
+                        <div style={{fontSize:20,fontWeight:700,
+                          color:isWin?RED:GREEN,lineHeight:1,marginTop:2}}>
+                          {oppPts?.toFixed(1)??'—'}
                         </div>
                       </div>
                       <Avatar managerId={opp.manager_id} size={28}/>
-                      <div style={{fontSize:20,fontWeight:700,color:isWin?RED:GREEN,
-                        flexShrink:0,minWidth:52,textAlign:'right'}}>
-                        {oppPts?.toFixed(1)??'—'}
-                      </div>
                     </div>
                   </div>
                 </div>
-
+ 
                 {isOpen&&hasPlayers&&(
                   <div style={{borderTop:'0.5px solid rgba(212,168,67,0.12)',padding:'8px 10px'}}>
                     {/* Proj row */}
@@ -1080,15 +1122,15 @@ function MatchupsTab({name}) {
     </div>
   )
 }
-
+ 
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function ManagerScreen() {
   const {name}          = useParams()
   const [activeTab,setActiveTab] = useState('overview')
-
+ 
   // Reset to overview when navigating to a different manager
   useEffect(()=>{ setActiveTab('overview') },[name])
-
+ 
   return (
     <div style={{flex:1,overflowY:'auto',display:'flex',flexDirection:'column'}}>
       <SectionNav tabs={TABS} activeKey={activeTab} onSelect={setActiveTab}/>
