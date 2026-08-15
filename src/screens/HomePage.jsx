@@ -8,7 +8,7 @@ const GOLD_BORDER = "rgba(212,168,67,0.3)"
 const BG_CARD = "#1e1e1e"
 const TEXT_PRIMARY = "#F0E6CC"
 const TEXT_SEC = "#A89060"
-const TEXT_MUTED = "#5A4828"
+const TEXT_MUTED = "#967843"
 const GREEN = "#5DBF6A"
 const RED = "#CF5F5F"
 
@@ -41,7 +41,7 @@ function Avatar({ managerId, photoUrl, size = 44, borderColor = GOLD }) {
 function StatTile({ label, value, sub }) {
   return (
     <div style={{
-      flex:1, background:BG_CARD, borderRadius:10,
+      flex:1, borderRadius:10,
       padding:"12px 8px", textAlign:"center",
     }}>
       <div style={{
@@ -187,10 +187,17 @@ export default function HomePage() {
             sub={tiles.years_active}
           />
           <StatTile
-            label="Active Members"
-            value={tiles.active_members}
-            sub={`${tiles.active_members} teams`}
+            label="Total Games"
+            value={tiles.total_games?.toLocaleString()}
+            sub="all time"
           />
+          <StatTile
+            label="Total Points"
+            value={tiles.total_points?.toLocaleString()}
+            sub="all time"
+          />
+        </div>
+      )}
         </div>
       )}
 
