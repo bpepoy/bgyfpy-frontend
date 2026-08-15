@@ -818,18 +818,20 @@ function MatchupsTab({name}) {
   const [yrData,setYrData]     = useState({})
   const [loading,setLoading]   = useState(false)
   const [expanded,setExpanded] = useState(null)
- 
+  const [managerInfo,setManagerInfo] = useState(null)
+
   useEffect(()=>{
     fetch(`${API}/fantasy/${name}/overview`)
       .then(r=>r.json())
       .then(d=>{
+        setManagerInfo(d)
         const latest = new Date().getFullYear()
         const played = d.seasons_played || 10
         const yrs = Array.from({length:played},(_,i)=>latest-i).filter(y=>y>=2007)
         if (yrs.length){setSeasons(yrs);setSeason(yrs[0])}
       }).catch(()=>{})
   },[name])
- 
+
   useEffect(()=>{
     if (eraData[era]) return
     fetch(`${API}/fantasy/${name}/matchups?era=${era}`)
@@ -837,7 +839,7 @@ function MatchupsTab({name}) {
       .then(d=>setEraData(prev=>({...prev,[era]:d})))
       .catch(()=>{})
   },[era,name])
- 
+
   useEffect(()=>{
     if (!season||yrData[season]) return
     setLoading(true)
@@ -846,34 +848,23 @@ function MatchupsTab({name}) {
       .then(d=>{setYrData(prev=>({...prev,[season]:d}));setLoading(false)})
       .catch(()=>setLoading(false))
   },[season,name])
- 
-  const [managerInfo, setManagerInfo] = useState(null)
- 
-  useEffect(()=>{
-    fetch(`${API}/fantasy/${name}/overview`)
-      .then(r=>r.json())
-      .then(d=>setManagerInfo(d))
-      .catch(()=>{})
-  },[name])
- 
+
+  const ACTIVE_MANAGERS = ['blake','brian','frank','jake','joey','jordan','kyle','nick','rob','zef']
   const eraD           = eraData[era] || {}
-  const vsOpponents    = view==='era'
-    ? (eraD.vs_opponents || [])
-    : []
+  const vsOpponents    = view==='era' ? (eraD.vs_opponents || []) : []
   const d              = yrData[season] || {}
   const weeklyMatchups = d.weekly_matchups || []
   const myDisplayName  = managerInfo?.display_name || name
- 
+
   const sortPlayers = ps => [...(ps||[])].sort((a,b)=>{
     const ai=POS_ORDER.indexOf(a.selected_position||a.position)
     const bi=POS_ORDER.indexOf(b.selected_position||b.position)
     return (ai===-1?99:ai)-(bi===-1?99:bi)
   })
- 
+
   return (
     <div style={{paddingBottom:24}}>
- 
-      {/* Era / Season toggle */}
+
       <ViewToggle value={view} onChange={v=>{setView(v);setExpanded(null)}}/>
       {view==='era'
         ? <EraToggle value={era} onChange={setEra}/>
@@ -882,76 +873,77 @@ function MatchupsTab({name}) {
               onChange={v=>{setSeason(v);setExpanded(null)}}/>
           )
       }
- 
-      {/* ERA VIEW — vs opponents summary */}
+
+      {/* ERA VIEW */}
       {view==='era' && (
         vsOpponents.length===0
           ? <div style={{padding:40,textAlign:'center',color:TEXT_3,fontSize:12}}>Loading…</div>
           : <>
-              {/* Active members first, then former */}
-              {['active','former'].map(group => {
-                const ACTIVE = ['blake','brian','frank','jake','joey','jordan','kyle','nick','rob','zef']
+              {['active','former'].map(group=>{
                 const filtered = [...vsOpponents]
-                  .filter(o => group==='active'
-                    ? ACTIVE.includes(o.manager_id)
-                    : !ACTIVE.includes(o.manager_id))
+                  .filter(o=>group==='active'
+                    ? ACTIVE_MANAGERS.includes(o.manager_id)
+                    : !ACTIVE_MANAGERS.includes(o.manager_id))
                   .sort((a,b)=>(b.combined?.wins||0)-(a.combined?.wins||0))
                 if (!filtered.length) return null
                 return (
-                <div key={group}>
-                  <SectionLabel label={group==='active' ? 'vs Active Members' : 'vs Former Members'}/>
-                  <Card>
-                {filtered.map((opp,i,arr)=>{
-                    const rs=opp.regular_season||{}
-                    const po=opp.playoffs||{}
-                    const winPct=(rs.wins+rs.losses)>0?rs.wins/(rs.wins+rs.losses):null
-                    return (
-                      <div key={opp.manager_id} style={{padding:'9px 12px',
-                        borderBottom:i<arr.length-1?'0.5px solid rgba(212,168,67,0.06)':'none'}}>
-                        <div style={{display:'flex',alignItems:'center',gap:10}}>
-                          <Avatar managerId={opp.manager_id} size={26}/>
-                          <div style={{flex:1}}>
-                            <div style={{fontSize:12,fontWeight:500,color:TEXT_1}}>{opp.display_name}</div>
-                            {opp.last_matchup&&(
-                              <div style={{fontSize:9,color:TEXT_3,marginTop:1}}>
-                                Last: {opp.last_matchup.result} · {opp.last_matchup.year} Wk {opp.last_matchup.week}
-                                {` (${opp.last_matchup.my_pts}–${opp.last_matchup.opp_pts})`}
+                  <div key={group}>
+                    <SectionLabel label={group==='active'?'vs Active Members':'vs Former Members'}/>
+                    <Card>
+                      {filtered.map((opp,i,arr)=>{
+                        const rs=opp.regular_season||{}
+                        const po=opp.playoffs||{}
+                        const winPct=(rs.wins+rs.losses)>0?rs.wins/(rs.wins+rs.losses):null
+                        return (
+                          <div key={opp.manager_id} style={{padding:'9px 12px',
+                            borderBottom:i<arr.length-1?'0.5px solid rgba(212,168,67,0.06)':'none'}}>
+                            <div style={{display:'flex',alignItems:'center',gap:10}}>
+                              <Avatar managerId={opp.manager_id} size={26}/>
+                              <div style={{flex:1}}>
+                                <div style={{fontSize:12,fontWeight:500,color:TEXT_1}}>{opp.display_name}</div>
+                                {opp.last_matchup&&(
+                                  <div style={{fontSize:9,color:TEXT_3,marginTop:1}}>
+                                    Last: {opp.last_matchup.result} · {opp.last_matchup.year} Wk {opp.last_matchup.week}
+                                    {` (${opp.last_matchup.my_pts}–${opp.last_matchup.opp_pts})`}
+                                  </div>
+                                )}
+                              </div>
+                              <div style={{textAlign:'right'}}>
+                                <div style={{fontSize:13,fontWeight:600,
+                                  color:winPct===null?TEXT_3:winPct>0.5?GREEN:winPct<0.5?RED:TEXT_2}}>
+                                  {rs.wins}–{rs.losses}
+                                </div>
+                                {(po.wins||po.losses)?(
+                                  <div style={{fontSize:9,color:TEXT_3}}>PO: {po.wins||0}–{po.losses||0}</div>
+                                ):null}
+                              </div>
+                            </div>
+                            {rs.avg_pf&&(
+                              <div style={{display:'flex',gap:12,marginTop:5,paddingLeft:36}}>
+                                {[
+                                  {l:'Avg PF',v:rs.avg_pf?.toFixed(1)},
+                                  {l:'Avg PA',v:rs.avg_pa?.toFixed(1)},
+                                  {l:'Diff',v:rs.avg_diff!=null?`${rs.avg_diff>0?'+':''}${rs.avg_diff.toFixed(1)}`:'—',
+                                   c:rs.avg_diff>0?GREEN:rs.avg_diff<0?RED:TEXT_2},
+                                ].map(s=>(
+                                  <div key={s.l} style={{textAlign:'center'}}>
+                                    <div style={{fontSize:7,color:TEXT_3,marginBottom:1}}>{s.l}</div>
+                                    <div style={{fontSize:10,color:s.c||TEXT_2,fontWeight:500}}>{s.v||'—'}</div>
+                                  </div>
+                                ))}
                               </div>
                             )}
                           </div>
-                          <div style={{textAlign:'right'}}>
-                            <div style={{fontSize:13,fontWeight:600,
-                              color:winPct===null?TEXT_3:winPct>0.5?GREEN:winPct<0.5?RED:TEXT_2}}>
-                              {rs.wins}–{rs.losses}
-                            </div>
-                            {(po.wins||po.losses)?(
-                              <div style={{fontSize:9,color:TEXT_3}}>PO: {po.wins||0}–{po.losses||0}</div>
-                            ):null}
-                          </div>
-                        </div>
-                        {rs.avg_pf&&(
-                          <div style={{display:'flex',gap:12,marginTop:5,paddingLeft:36}}>
-                            {[
-                              {l:'Avg PF',v:rs.avg_pf?.toFixed(1)},
-                              {l:'Avg PA',v:rs.avg_pa?.toFixed(1)},
-                              {l:'Diff',v:rs.avg_diff!=null?`${rs.avg_diff>0?'+':''}${rs.avg_diff.toFixed(1)}`:'—',
-                               c:rs.avg_diff>0?GREEN:rs.avg_diff<0?RED:TEXT_2},
-                            ].map(s=>(
-                              <div key={s.l} style={{textAlign:'center'}}>
-                                <div style={{fontSize:7,color:TEXT_3,marginBottom:1}}>{s.l}</div>
-                                <div style={{fontSize:10,color:s.c||TEXT_2,fontWeight:500}}>{s.v||'—'}</div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-              </Card>
+                        )
+                      })}
+                    </Card>
+                  </div>
+                )
+              })}
             </>
       )}
- 
-      {/* SEASON VIEW — weekly matchups */}
+
+      {/* SEASON VIEW */}
       {view==='season' && (
         loading
           ? <div style={{padding:30,textAlign:'center',color:TEXT_3,fontSize:12}}>Loading…</div>
@@ -961,185 +953,163 @@ function MatchupsTab({name}) {
               </div>
             : <>
                 <SectionLabel label={`${season} Season`}/>
-          {weeklyMatchups.map((wk,idx)=>{
-            const opp      = wk.opponent||{}
-            const isOpen   = expanded===idx
-            const isWin    = wk.result==='W'
-            const myPts    = wk.my_points
-            const oppPts   = wk.opp_points
-            const diff     = wk.diff
-            const myPlayers  = sortPlayers(wk.my_roster||[])
-            const oppPlayers = sortPlayers(wk.opp_roster||[])
-            const maxRows    = Math.max(myPlayers.length,oppPlayers.length)
-            const hasPlayers = wk.players_available&&myPlayers.length>0
- 
-            return (
-              <div key={idx} onClick={()=>hasPlayers&&setExpanded(i=>i===idx?null:idx)}
-                style={{margin:'0 14px 8px',background:BG_CARD,borderRadius:10,
-                  border:`0.5px solid ${wk.is_playoffs?'rgba(212,168,67,0.4)':GOLD_BORDER}`,
-                  overflow:'hidden',cursor:hasPlayers?'pointer':'default'}}>
-                <div style={{padding:'8px 10px'}}>
-                  {/* Week label row */}
-                  <div style={{display:'flex',alignItems:'center',
-                    justifyContent:'space-between',marginBottom:6}}>
-                    <span style={{fontSize:9,color:TEXT_3}}>
-                      {wk.is_playoffs?'🏆 Playoffs':'RS'} · Wk {wk.week}
-                    </span>
-                    {hasPlayers&&(
-                      <span style={{fontSize:10,color:TEXT_3,
-                        transform:isOpen?'rotate(180deg)':'none',
-                        transition:'transform 0.2s'}}>▼</span>
-                    )}
-                  </div>
-                  {/* Symmetric score row */}
-                  <div style={{display:'grid',
-                    gridTemplateColumns:'1fr auto 1fr',
-                    alignItems:'center',gap:6}}>
-                    {/* Left — me */}
-                    <div style={{display:'flex',alignItems:'center',gap:7}}>
-                      <Avatar managerId={name} size={28}/>
-                      <div style={{minWidth:0}}>
-                        <div style={{fontSize:11,fontWeight:500,color:TEXT_1,
-                          overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
-                          {myDisplayName}
+                {weeklyMatchups.map((wk,idx)=>{
+                  const opp        = wk.opponent||{}
+                  const isOpen     = expanded===idx
+                  const isWin      = wk.result==='W'
+                  const myPts      = wk.my_points
+                  const oppPts     = wk.opp_points
+                  const diff       = wk.diff
+                  const myPlayers  = sortPlayers(wk.my_roster||[])
+                  const oppPlayers = sortPlayers(wk.opp_roster||[])
+                  const maxRows    = Math.max(myPlayers.length,oppPlayers.length)
+                  const hasPlayers = wk.players_available&&myPlayers.length>0
+
+                  return (
+                    <div key={idx} onClick={()=>hasPlayers&&setExpanded(i=>i===idx?null:idx)}
+                      style={{margin:'0 14px 8px',background:BG_CARD,borderRadius:10,
+                        border:`0.5px solid ${wk.is_playoffs?'rgba(212,168,67,0.4)':GOLD_BORDER}`,
+                        overflow:'hidden',cursor:hasPlayers?'pointer':'default'}}>
+
+                      <div style={{padding:'8px 10px'}}>
+                        {/* Week label */}
+                        <div style={{display:'flex',alignItems:'center',
+                          justifyContent:'space-between',marginBottom:6}}>
+                          <span style={{fontSize:9,color:TEXT_3}}>
+                            {wk.is_playoffs?'🏆 Playoffs':'RS'} · Wk {wk.week}
+                          </span>
+                          {hasPlayers&&(
+                            <span style={{fontSize:10,color:TEXT_3,
+                              transform:isOpen?'rotate(180deg)':'none',
+                              transition:'transform 0.2s'}}>▼</span>
+                          )}
                         </div>
-                        <div style={{fontSize:9,color:TEXT_3,
-                          overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
-                          {wk.my_team_name||''}
-                        </div>
-                        <div style={{fontSize:20,fontWeight:700,color:isWin?GREEN:RED,
-                          lineHeight:1,marginTop:2}}>
-                          {myPts?.toFixed(1)??'—'}
+
+                        {/* Symmetric score row */}
+                        <div style={{display:'grid',gridTemplateColumns:'1fr auto 1fr',
+                          alignItems:'center',gap:6}}>
+
+                          {/* Left — me */}
+                          <div style={{display:'flex',alignItems:'center',gap:7}}>
+                            <Avatar managerId={name} size={28}/>
+                            <div style={{minWidth:0}}>
+                              <div style={{fontSize:11,fontWeight:500,color:TEXT_1,
+                                overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+                                {myDisplayName}
+                              </div>
+                              <div style={{fontSize:9,color:TEXT_3,
+                                overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+                                {wk.my_team_name||''}
+                              </div>
+                              <div style={{fontSize:20,fontWeight:700,color:isWin?GREEN:RED,
+                                lineHeight:1,marginTop:2}}>
+                                {myPts?.toFixed(1)??'—'}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Center — diff */}
+                          <div style={{textAlign:'center',flexShrink:0}}>
+                            {diff!=null&&(
+                              <div style={{fontSize:11,fontWeight:600,color:diff>0?GREEN:RED}}>
+                                {diff>0?'+':''}{diff.toFixed(1)}
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Right — opponent */}
+                          <div style={{display:'flex',alignItems:'center',
+                            gap:7,justifyContent:'flex-end'}}>
+                            <div style={{minWidth:0,textAlign:'right'}}>
+                              <div style={{fontSize:11,fontWeight:500,color:TEXT_1,
+                                overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+                                {opp.display_name}
+                              </div>
+                              <div style={{fontSize:9,color:TEXT_3,
+                                overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
+                                {opp.team_name||''}
+                              </div>
+                              <div style={{fontSize:20,fontWeight:700,
+                                color:isWin?RED:GREEN,lineHeight:1,marginTop:2}}>
+                                {oppPts?.toFixed(1)??'—'}
+                              </div>
+                            </div>
+                            <Avatar managerId={opp.manager_id} size={28}/>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                    {/* Center — diff */}
-                    <div style={{textAlign:'center',flexShrink:0}}>
-                      {diff!=null&&(
-                        <div style={{fontSize:11,fontWeight:600,
-                          color:diff>0?GREEN:RED}}>
-                          {diff>0?'+':''}{diff.toFixed(1)}
+
+                      {/* Player breakdown */}
+                      {isOpen&&hasPlayers&&(
+                        <div style={{borderTop:'0.5px solid rgba(212,168,67,0.12)',padding:'8px 10px'}}>
+                          {wk.my_projected&&(
+                            <div style={{display:'flex',justifyContent:'space-between',
+                              padding:'3px 0 6px',marginBottom:4,
+                              borderBottom:'0.5px solid rgba(212,168,67,0.08)'}}>
+                              <span style={{fontSize:9,color:TEXT_3}}>Proj: {wk.my_projected?.toFixed(1)}</span>
+                              <span style={{fontSize:9,color:TEXT_3}}>PROJ</span>
+                              <span style={{fontSize:9,color:TEXT_3}}>{wk.opp_projected?.toFixed(1)}</span>
+                            </div>
+                          )}
+                          <div style={{display:'grid',gridTemplateColumns:'1fr 40px 1fr',
+                            gap:4,paddingBottom:4,marginBottom:4,
+                            borderBottom:'0.5px solid rgba(212,168,67,0.1)'}}>
+                            <span style={{fontSize:8,fontWeight:500,color:TEXT_2}}>Me</span>
+                            <span style={{fontSize:8,color:TEXT_3,textAlign:'center'}}>POS</span>
+                            <span style={{fontSize:8,fontWeight:500,color:TEXT_2,textAlign:'right'}}>
+                              {opp.display_name}
+                            </span>
+                          </div>
+                          {Array.from({length:maxRows}).map((_,pi)=>{
+                            const pA=myPlayers[pi], pB=oppPlayers[pi]
+                            const pos=(pA?.selected_position||pB?.selected_position||'—')
+                            const pc=POS_COLORS[pos]||TEXT_3
+                            const aPts=pA?.points??pA?.week_pts
+                            const bPts=pB?.points??pB?.week_pts
+                            const aWins=aPts!=null&&bPts!=null?aPts>bPts:null
+                            return (
+                              <div key={pi} style={{display:'grid',gridTemplateColumns:'1fr 40px 1fr',
+                                gap:4,padding:'4px 0',
+                                borderBottom:'0.5px solid rgba(212,168,67,0.05)',alignItems:'start'}}>
+                                <div>
+                                  {pA?<>
+                                    <div style={{fontSize:11,fontWeight:500,
+                                      color:aWins===true?GREEN:aWins===false?RED:TEXT_2}}>
+                                      {aPts?.toFixed(1)??'—'}
+                                    </div>
+                                    <div style={{fontSize:9,color:TEXT_2,lineHeight:1.3}}>
+                                      {pA.player_name?.split(' ').pop()||pA.name?.split(' ').pop()}
+                                    </div>
+                                    {pA.is_on_bench&&<div style={{fontSize:7,color:'#5B9BD5'}}>BN</div>}
+                                  </>:<div style={{fontSize:9,color:TEXT_3}}>—</div>}
+                                </div>
+                                <div style={{textAlign:'center',paddingTop:2}}>
+                                  <span style={{fontSize:7,color:pc,background:`${pc}22`,
+                                    border:`0.5px solid ${pc}44`,borderRadius:4,
+                                    padding:'1px 4px',display:'inline-block'}}>{pos}</span>
+                                </div>
+                                <div style={{textAlign:'right'}}>
+                                  {pB?<>
+                                    <div style={{fontSize:11,fontWeight:500,
+                                      color:aWins===false?GREEN:aWins===true?RED:TEXT_2}}>
+                                      {bPts?.toFixed(1)??'—'}
+                                    </div>
+                                    <div style={{fontSize:9,color:TEXT_2,lineHeight:1.3}}>
+                                      {pB.player_name?.split(' ').pop()||pB.name?.split(' ').pop()}
+                                    </div>
+                                    {pB.is_on_bench&&<div style={{fontSize:7,color:'#5B9BD5',textAlign:'right'}}>BN</div>}
+                                  </>:<div style={{fontSize:9,color:TEXT_3}}>—</div>}
+                                </div>
+                              </div>
+                            )
+                          })}
                         </div>
                       )}
                     </div>
-                    {/* Right — opponent */}
-                    <div style={{display:'flex',alignItems:'center',
-                      gap:7,justifyContent:'flex-end'}}>
-                      <div style={{minWidth:0,textAlign:'right'}}>
-                        <div style={{fontSize:11,fontWeight:500,color:TEXT_1,
-                          overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
-                          {opp.display_name}
-                        </div>
-                        <div style={{fontSize:9,color:TEXT_3,
-                          overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>
-                          {opp.team_name||''}
-                        </div>
-                        <div style={{fontSize:20,fontWeight:700,
-                          color:isWin?RED:GREEN,lineHeight:1,marginTop:2}}>
-                          {oppPts?.toFixed(1)??'—'}
-                        </div>
-                      </div>
-                      <Avatar managerId={opp.manager_id} size={28}/>
-                    </div>
-                  </div>
-                </div>
- 
-                {isOpen&&hasPlayers&&(
-                  <div style={{borderTop:'0.5px solid rgba(212,168,67,0.12)',padding:'8px 10px'}}>
-                    {/* Proj row */}
-                    {wk.my_projected&&(
-                      <div style={{display:'flex',justifyContent:'space-between',
-                        padding:'3px 0 6px',marginBottom:4,
-                        borderBottom:'0.5px solid rgba(212,168,67,0.08)'}}>
-                        <span style={{fontSize:9,color:TEXT_3}}>
-                          Proj: {wk.my_projected?.toFixed(1)}
-                        </span>
-                        <span style={{fontSize:9,color:TEXT_3}}>PROJ</span>
-                        <span style={{fontSize:9,color:TEXT_3}}>
-                          {wk.opp_projected?.toFixed(1)}
-                        </span>
-                      </div>
-                    )}
-                    <div style={{display:'grid',gridTemplateColumns:'1fr 40px 1fr',
-                      gap:4,paddingBottom:4,marginBottom:4,
-                      borderBottom:'0.5px solid rgba(212,168,67,0.1)'}}>
-                      <span style={{fontSize:8,fontWeight:500,color:TEXT_2}}>Me</span>
-                      <span style={{fontSize:8,color:TEXT_3,textAlign:'center'}}>POS</span>
-                      <span style={{fontSize:8,fontWeight:500,color:TEXT_2,textAlign:'right'}}>
-                        {opp.display_name}
-                      </span>
-                    </div>
-                    {Array.from({length:maxRows}).map((_,pi)=>{
-                      const pA=myPlayers[pi], pB=oppPlayers[pi]
-                      const pos=(pA?.selected_position||pB?.selected_position||'—')
-                      const pc=POS_COLORS[pos]||TEXT_3
-                      const aPts = pA?.points??pA?.week_pts
-                      const bPts = pB?.points??pB?.week_pts
-                      const aWins=aPts!=null&&bPts!=null?aPts>bPts:null
-                      return (
-                        <div key={pi} style={{display:'grid',gridTemplateColumns:'1fr 40px 1fr',
-                          gap:4,padding:'4px 0',
-                          borderBottom:'0.5px solid rgba(212,168,67,0.05)',alignItems:'start'}}>
-                          <div>
-                            {pA?<>
-                              <div style={{fontSize:11,fontWeight:500,
-                                color:aWins===true?GREEN:aWins===false?RED:TEXT_2}}>
-                                {aPts?.toFixed(1)??'—'}
-                              </div>
-                              <div style={{fontSize:9,color:TEXT_2,lineHeight:1.3}}>
-                                {pA.player_name?.split(' ').pop()||pA.name?.split(' ').pop()}
-                              </div>
-                              {pA.is_on_bench&&<div style={{fontSize:7,color:'#5B9BD5'}}>BN</div>}
-                            </>:<div style={{fontSize:9,color:TEXT_3}}>—</div>}
-                          </div>
-                          <div style={{textAlign:'center',paddingTop:2}}>
-                            <span style={{fontSize:7,color:pc,background:`${pc}22`,
-                              border:`0.5px solid ${pc}44`,borderRadius:4,
-                              padding:'1px 4px',display:'inline-block'}}>{pos}</span>
-                          </div>
-                          <div style={{textAlign:'right'}}>
-                            {pB?<>
-                              <div style={{fontSize:11,fontWeight:500,
-                                color:aWins===false?GREEN:aWins===true?RED:TEXT_2}}>
-                                {bPts?.toFixed(1)??'—'}
-                              </div>
-                              <div style={{fontSize:9,color:TEXT_2,lineHeight:1.3}}>
-                                {pB.player_name?.split(' ').pop()||pB.name?.split(' ').pop()}
-                              </div>
-                              {pB.is_on_bench&&<div style={{fontSize:7,color:'#5B9BD5',textAlign:'right'}}>BN</div>}
-                            </>:<div style={{fontSize:9,color:TEXT_3}}>—</div>}
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-            )
-              })}
-            </>
+                  )
+                })}
+              </>
       )}
-    </div>
-  )
-}
- 
-// ── Main ──────────────────────────────────────────────────────────────────────
-export default function ManagerScreen() {
-  const {name}          = useParams()
-  const [activeTab,setActiveTab] = useState('overview')
- 
-  // Reset to overview when navigating to a different manager
-  useEffect(()=>{ setActiveTab('overview') },[name])
- 
-  return (
-    <div style={{flex:1,overflowY:'auto',display:'flex',flexDirection:'column'}}>
-      <SectionNav tabs={TABS} activeKey={activeTab} onSelect={setActiveTab}/>
-      <div style={{flex:1,overflowY:'auto'}}>
-        {activeTab==='overview'     && <OverviewTab      name={name}/>}
-        {activeTab==='results'      && <ResultsTab       name={name}/>}
-        {activeTab==='transactions' && <TransactionsTab  name={name}/>}
-        {activeTab==='matchups'     && <MatchupsTab      name={name}/>}
-      </div>
     </div>
   )
 }
