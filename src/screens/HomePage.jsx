@@ -8,7 +8,7 @@ const GOLD_BORDER = "rgba(212,168,67,0.3)"
 const BG_CARD = "#1e1e1e"
 const TEXT_PRIMARY = "#F0E6CC"
 const TEXT_SEC = "#A89060"
-const TEXT_MUTED = "#5A4828"
+const TEXT_MUTED = "#967843"
 const GREEN = "#5DBF6A"
 const RED = "#CF5F5F"
 
@@ -165,7 +165,7 @@ export default function HomePage() {
         alignItems:"center", gap:10,
       }}>
         <img src="/icons/blackgold-logo.png" alt="BlackGold"
-          style={{width:130, height:130, borderRadius:18}}/>
+          style={{width:300, height:300, borderRadius:18}}/>
         <div style={{textAlign:"center"}}>
           <div style={{
             fontSize:28, fontWeight:500, color:GOLD,
