@@ -8,7 +8,7 @@ const GOLD_BORDER = "rgba(212,168,67,0.3)"
 const BG_CARD = "#1e1e1e"
 const TEXT_PRIMARY = "#F0E6CC"
 const TEXT_SEC = "#A89060"
-const TEXT_MUTED = "#967843"
+const TEXT_MUTED = "#5A4828"
 const GREEN = "#5DBF6A"
 const RED = "#CF5F5F"
 
@@ -196,8 +196,6 @@ export default function HomePage() {
             value={tiles.total_points?.toLocaleString()}
             sub="all time"
           />
-        </div>
-      )}
         </div>
       )}
 
