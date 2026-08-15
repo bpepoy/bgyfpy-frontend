@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react"
-import Avatar from '../components/Avatar'
 
 const API = "https://bgyfpy-backend.onrender.com"
 
@@ -9,7 +8,7 @@ const GOLD_BORDER = "rgba(212,168,67,0.3)"
 const BG_CARD = "#1e1e1e"
 const TEXT_PRIMARY = "#F0E6CC"
 const TEXT_SEC = "#A89060"
-const TEXT_MUTED = "#967843"
+const TEXT_MUTED = "#5A4828"
 const GREEN = "#5DBF6A"
 const RED = "#CF5F5F"
 
@@ -18,19 +17,39 @@ const INITIALS = {
   joey:"JY", jordan:"JM", kyle:"KB", nick:"ND", rob:"RD", zef:"ZD"
 }
 
+function Avatar({ managerId, photoUrl, size = 44, borderColor = GOLD }) {
+  const initials = INITIALS[managerId] || managerId?.slice(0,2).toUpperCase() || "?"
+  return (
+    <div style={{
+      width:size, height:size, borderRadius:"50%",
+      border:`1.5px solid ${borderColor}`,
+      overflow:"hidden", flexShrink:0,
+      display:"flex", alignItems:"center", justifyContent:"center",
+      background: photoUrl ? "transparent" : GOLD_DIM,
+      fontSize:size*0.28, fontWeight:500,
+      color:GOLD, letterSpacing:"0.04em",
+    }}>
+      {photoUrl
+        ? <img src={photoUrl} alt={managerId}
+            style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+        : initials
+      }
+    </div>
+  )
+}
+
 function StatTile({ label, value, sub }) {
   return (
     <div style={{
       flex:1, background:BG_CARD, borderRadius:10,
-      border:`0.5px solid ${GOLD_BORDER}`,
-      padding:"14px 12px", textAlign:"center",
+      padding:"12px 8px", textAlign:"center",
     }}>
       <div style={{
-        fontSize:10, color:TEXT_MUTED, letterSpacing:"0.1em",
-        textTransform:"uppercase", marginBottom:6,
+        fontSize:8, color:TEXT_MUTED, letterSpacing:"0.08em",
+        textTransform:"uppercase", marginBottom:6, whiteSpace:"nowrap",
       }}>{label}</div>
-      <div style={{fontSize:30, fontWeight:500, color:GOLD, lineHeight:1}}>{value}</div>
-      {sub && <div style={{fontSize:9, color:TEXT_MUTED, marginTop:4}}>{sub}</div>}
+      <div style={{fontSize:22, fontWeight:500, color:GOLD, lineHeight:1}}>{value}</div>
+      {sub && <div style={{fontSize:8, color:TEXT_MUTED, marginTop:4}}>{sub}</div>}
     </div>
   )
 }
@@ -141,25 +160,24 @@ export default function HomePage() {
 
       {/* Hero */}
       <div style={{
-        padding:"20px 16px 16px",
-        display:"flex", alignItems:"center", gap:16,
+        padding:"20px 16px 12px",
+        display:"flex", flexDirection:"column",
+        alignItems:"center", gap:10,
       }}>
         <img src="/icons/blackgold-logo.png" alt="BlackGold"
-          style={{width:200, height:200, borderRadius:14, flexShrink:0}}/>
-        <div style={{minWidth:0}}>
+          style={{width:130, height:130, borderRadius:18}}/>
+        <div style={{textAlign:"center"}}>
           <div style={{
-            fontSize:30, fontWeight:500, color:GOLD,
-            letterSpacing:"0.04em", lineHeight:1.1,
-            whiteSpace:"nowrap", overflow:"hidden",
-            textOverflow:"ellipsis",
+            fontSize:28, fontWeight:500, color:GOLD,
+            letterSpacing:"0.06em", lineHeight:1.1,
           }}>BLACKGOLD</div>
           <div style={{
-            fontSize:12, color:TEXT_SEC, letterSpacing:"0.14em",
-            marginTop:6, textTransform:"uppercase",
+            fontSize:11, color:TEXT_SEC, letterSpacing:"0.18em",
+            marginTop:4, textTransform:"uppercase",
           }}>Est. 2007</div>
         </div>
       </div>
-      
+
       {/* Stat tiles */}
       {tiles && (
         <div style={{display:"flex", gap:10, padding:"0 14px", marginBottom:14}}>
@@ -167,19 +185,11 @@ export default function HomePage() {
             label="Total Seasons"
             value={tiles.total_seasons}
             sub={tiles.years_active}
-            noBorder
           />
           <StatTile
-            label="Total Games"
-            value={tiles.total_games?.toLocaleString()}
-            sub="all time"
-            noBorder
-          />
-          <StatTile
-            label="Total Points"
-            value={tiles.total_points?.toLocaleString()}
-            sub="all time"
-            noBorder
+            label="Active Members"
+            value={tiles.active_members}
+            sub={`${tiles.active_members} teams`}
           />
         </div>
       )}
