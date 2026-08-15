@@ -1113,3 +1113,23 @@ function MatchupsTab({name}) {
     </div>
   )
 }
+
+// ── Main ──────────────────────────────────────────────────────────────────────
+export default function ManagerScreen() {
+  const {name}          = useParams()
+  const [activeTab,setActiveTab] = useState('overview')
+
+  useEffect(()=>{ setActiveTab('overview') },[name])
+
+  return (
+    <div style={{flex:1,overflowY:'auto',display:'flex',flexDirection:'column'}}>
+      <SectionNav tabs={TABS} activeKey={activeTab} onSelect={setActiveTab}/>
+      <div style={{flex:1,overflowY:'auto'}}>
+        {activeTab==='overview'     && <OverviewTab      name={name}/>}
+        {activeTab==='results'      && <ResultsTab       name={name}/>}
+        {activeTab==='transactions' && <TransactionsTab  name={name}/>}
+        {activeTab==='matchups'     && <MatchupsTab      name={name}/>}
+      </div>
+    </div>
+  )
+}
