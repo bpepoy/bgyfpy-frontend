@@ -221,48 +221,43 @@ function LeagueRulesTab({ data }) {
       )}
 
       {segment === 'scoring' && (() => {
-        // Group stats by position category
-        const GROUP_ORDER = ['QB', 'WR/TE', 'RB', 'DEF', 'K', 'Other']
-        const GROUP_KEYWORDS = {
-          'QB':    ['pass', 'sack', 'interception thrown', 'fumble lost'],
-          'WR/TE': ['receiv', 'reception', 'target', 'catch'],
-          'RB':    ['rush', 'carry', 'carries'],
-          'DEF':   ['defense', 'def', 'return', 'block', 'safety', 'point allow', 'yard allow', 'turnover', 'td allow', 'sack'],
-          'K':     ['field goal', 'extra point', 'pat ', 'fg ', 'xp '],
+        const scoringData = rules?.scoring_by_position_type || {}
+ 
+        const OFFENSE_ORDER = [4, 5, 6, 11, 9, 12, 10, 13, 16, 18, 57]
+        const DEFENSE_ORDER = [32, 33, 34, 36, 37, 82, 67, 35, 15, 49, 50, 51, 52, 53, 54, 55, 56]
+ 
+        const sortStats = (stats, order) => {
+          const ordered = order
+            .map(id => stats.find(s => s.stat_id === id))
+            .filter(Boolean)
+          const rest = stats.filter(s => !order.includes(s.stat_id))
+          return [...ordered, ...rest]
         }
-        const getGroup = (stat) => {
-          const name = (stat.name || '').toLowerCase()
-          if (GROUP_KEYWORDS.QB.some(k => name.includes(k)))    return 'QB'
-          if (GROUP_KEYWORDS['WR/TE'].some(k => name.includes(k))) return 'WR/TE'
-          if (GROUP_KEYWORDS.RB.some(k => name.includes(k)))    return 'RB'
-          if (GROUP_KEYWORDS.K.some(k => name.includes(k)))     return 'K'
-          if (GROUP_KEYWORDS.DEF.some(k => name.includes(k)))   return 'DEF'
-          return 'Other'
-        }
-        const grouped = {}
-        scoringStats.forEach(s => {
-          const g = getGroup(s)
-          if (!grouped[g]) grouped[g] = []
-          grouped[g].push(s)
-        })
+ 
+        const offenseStats = sortStats(scoringData['O'] || [], OFFENSE_ORDER)
+          .filter(s => s.enabled && !s.is_only_display_stat && s.points_per_unit !== 0)
+        const defenseStats = sortStats(scoringData['DT'] || [], DEFENSE_ORDER)
+          .filter(s => s.enabled && !s.is_only_display_stat && s.points_per_unit !== 0)
+ 
+        const renderStats = (stats) => stats.map((stat, i, arr) => (
+          <div key={stat.stat_id} style={{display:'flex',justifyContent:'space-between',
+            alignItems:'center', padding:'9px 14px',
+            borderBottom:i<arr.length-1?'0.5px solid rgba(212,168,67,0.08)':'none'}}>
+            <span style={{fontSize:12,color:'#F0E6CC'}}>{stat.name}</span>
+            <span style={{fontSize:12,fontWeight:500,
+              color:stat.points_per_unit<0?'#CF5F5F':'#D4A843'}}>
+              {stat.points_per_unit} pts
+            </span>
+          </div>
+        ))
+ 
         return (
-          <>
-            {GROUP_ORDER.filter(g => grouped[g]?.length).map(group => (
-              <div key={group}>
-                <SectionHeader label={group} />
-                <Card>
-                  {grouped[group].map((s, i) => (
-                    <Row
-                      key={s.stat_id}
-                      label={s.name}
-                      value={`${s.points_per_unit > 0 ? '+' : ''}${s.points_per_unit} pts`}
-                      last={i === grouped[group].length - 1}
-                    />
-                  ))}
-                </Card>
-              </div>
-            ))}
-          </>
+          <div>
+            <SectionLabel label="Offense"/>
+            <Card>{renderStats(offenseStats)}</Card>
+            <SectionLabel label="Defense / Special Teams"/>
+            <Card>{renderStats(defenseStats)}</Card>
+          </div>
         )
       })()}
 
@@ -381,8 +376,10 @@ function SeasonCard({ season, isOpen, onOpen }) {
         </div>
         {/* Champion headline */}
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 500, color: TEXT_1, display: 'flex', alignItems: 'center', gap: 5 }}>
-            🏆 {champ.display_name}
+          <div style={{ fontSize: 13, fontWeight: 500, color: TEXT_1, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <Avatar managerId={champ.manager_id} size={28}/>
+            {champ.display_name}
+          </div>
           </div>
           <div style={{ fontSize: 10, color: TEXT_2, marginTop: 2 }}>
             {champ.team_name} · {fmtRecord(champ)}

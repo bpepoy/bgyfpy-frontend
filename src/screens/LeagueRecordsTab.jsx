@@ -141,9 +141,6 @@ function FranchiseRecords({ data }) {
     ],[
       { key:'most_playoff_appearances', label:'Most Playoff Apps',       icon:'🎯' },
       { key:'most_finals_appearances',  label:'Most Finals Apps',        icon:'⭐' },
-    ],[
-      { key:'best_win_pct',             label:'Best Win %',              icon:'📊' },
-      { key:'most_points_career',       label:'Most Career PF',          icon:'💥' },
     ],
   ]
   return (
