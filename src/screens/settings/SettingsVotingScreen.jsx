@@ -14,79 +14,98 @@ const RED         = '#CF5F5F'
 
 
 function ProposalCard({ proposal, onVote, voted, myVote }) {
+  const [lightboxUrl, setLightboxUrl] = useState(null)
   const vs     = proposal.vote_summary || {}
   const total  = vs.total_voted || 0
   const needed = vs.threshold || 6
   const pct    = total > 0 ? (vs.approve / total) * 100 : 0
 
   return (
-    <div style={{ background:BG_CARD, borderRadius:12,
-      border:`0.5px solid ${GOLD_BORDER}`,
-      margin:'0 14px 12px', overflow:'hidden' }}>
-
-      {/* Proposal content */}
-      <div style={{ padding:'12px 14px' }}>
-        <div style={{ fontSize:13, fontWeight:500, color:TEXT_1, marginBottom:4 }}>
-          {proposal.title}
+    <>
+      {/* Lightbox */}
+      {lightboxUrl && (
+        <div onClick={() => setLightboxUrl(null)}
+          style={{ position:'fixed', inset:0, zIndex:300,
+            background:'rgba(0,0,0,0.95)',
+            display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <button onClick={() => setLightboxUrl(null)}
+            style={{ position:'absolute', top:16, right:16,
+              background:'none', border:'none', color:'#fff',
+              fontSize:28, cursor:'pointer' }}>✕</button>
+          <img src={lightboxUrl} alt="Proposal"
+            style={{ maxWidth:'100%', maxHeight:'90dvh', objectFit:'contain' }}/>
         </div>
-        <div style={{ fontSize:11, color:TEXT_2, lineHeight:1.6, marginBottom:8 }}>
-          {proposal.description}
-        </div>
-        <div style={{ fontSize:9, color:TEXT_3 }}>
-          Submitted by {proposal.submitted_by} · {proposal.created_at?.slice(0,10)}
-        </div>
-      </div>
-
-      {/* Attachment */}
-      {proposal.attachment_url && (
-        <img src={proposal.attachment_url} alt="Attachment"
-          style={{ width:'100%', maxHeight:160, objectFit:'cover' }}/>
       )}
 
-      {/* Vote progress */}
-      <div style={{ padding:'10px 14px',
-        borderTop:`0.5px solid rgba(212,168,67,0.08)` }}>
-        <div style={{ display:'flex', justifyContent:'space-between',
-          fontSize:9, color:TEXT_3, marginBottom:6 }}>
-          <span>{vs.approve||0} approve · {vs.reject||0} reject · {vs.pending||0} pending</span>
-          <span>Need {needed} to pass</span>
-        </div>
-        <div style={{ height:4, borderRadius:2,
-          background:'rgba(255,255,255,0.08)', overflow:'hidden' }}>
-          <div style={{ height:'100%', borderRadius:2, background:GREEN,
-            width:`${pct}%`, transition:'width 0.3s' }}/>
-        </div>
-      </div>
+      <div style={{ background:BG_CARD, borderRadius:12,
+        border:`0.5px solid ${GOLD_BORDER}`,
+        margin:'0 14px 12px', overflow:'hidden' }}>
 
-      {/* Vote buttons or result */}
-      <div style={{ padding:'10px 14px',
-        borderTop:`0.5px solid rgba(212,168,67,0.08)` }}>
-        {voted ? (
-          <div style={{ display:'flex', alignItems:'center', gap:8,
-            fontSize:11, color:myVote==='approve'?GREEN:RED }}>
-            <span>{myVote==='approve'?'✓':'✗'}</span>
-            <span>You voted {myVote}</span>
+        {/* Proposal content */}
+        <div style={{ padding:'12px 14px' }}>
+          <div style={{ fontSize:13, fontWeight:500, color:TEXT_1, marginBottom:4 }}>
+            {proposal.title}
           </div>
-        ) : (
-          <div style={{ display:'flex', gap:8 }}>
-            <button onClick={() => onVote(proposal.id, 'approve')}
-              style={{ flex:1, padding:'10px', borderRadius:10, border:'none',
-                cursor:'pointer', background:'rgba(93,191,106,0.12)',
-                border:`1px solid rgba(93,191,106,0.3)`,
-                fontSize:12, fontWeight:600, color:GREEN }}>
-              ✓ Approve
-            </button>
-            <button onClick={() => onVote(proposal.id, 'reject')}
-              style={{ flex:1, padding:'10px', borderRadius:10, border:'none',
-                cursor:'pointer', background:'rgba(207,95,95,0.12)',
-                border:`1px solid rgba(207,95,95,0.3)`,
-                fontSize:12, fontWeight:600, color:RED }}>
-              ✗ Reject
-            </button>
+          <div style={{ fontSize:11, color:TEXT_2, lineHeight:1.6, marginBottom:8 }}>
+            {proposal.description}
           </div>
+          <div style={{ fontSize:9, color:TEXT_3 }}>
+            Submitted by {proposal.submitted_by} · {proposal.created_at?.slice(0,10)}
+          </div>
+        </div>
+
+        {/* Attachment */}
+        {proposal.attachment_url && (
+          <img src={proposal.attachment_url} alt="Attachment"
+            onClick={() => setLightboxUrl(proposal.image_url)}
+            style={{ width:'100%', maxHeight:160, objectFit:'cover' }}/>
         )}
+
+        {/* Vote progress */}
+        <div style={{ padding:'10px 14px',
+          borderTop:`0.5px solid rgba(212,168,67,0.08)` }}>
+          <div style={{ display:'flex', justifyContent:'space-between',
+            fontSize:9, color:TEXT_3, marginBottom:6 }}>
+            <span>{vs.approve||0} approve · {vs.reject||0} reject · {vs.pending||0} pending</span>
+            <span>Need {needed} to pass</span>
+          </div>
+          <div style={{ height:4, borderRadius:2,
+            background:'rgba(255,255,255,0.08)', overflow:'hidden' }}>
+            <div style={{ height:'100%', borderRadius:2, background:GREEN,
+              width:`${pct}%`, transition:'width 0.3s' }}/>
+          </div>
+        </div>
+
+        {/* Vote buttons or result */}
+        <div style={{ padding:'10px 14px',
+          borderTop:`0.5px solid rgba(212,168,67,0.08)` }}>
+          {voted ? (
+            <div style={{ display:'flex', alignItems:'center', gap:8,
+              fontSize:11, color:myVote==='approve'?GREEN:RED }}>
+              <span>{myVote==='approve'?'✓':'✗'}</span>
+              <span>You voted {myVote}</span>
+            </div>
+          ) : (
+            <div style={{ display:'flex', gap:8 }}>
+              <button onClick={() => onVote(proposal.id, 'approve')}
+                style={{ flex:1, padding:'10px', borderRadius:10, border:'none',
+                  cursor:'pointer', background:'rgba(93,191,106,0.12)',
+                  border:`1px solid rgba(93,191,106,0.3)`,
+                  fontSize:12, fontWeight:600, color:GREEN }}>
+                ✓ Approve
+              </button>
+              <button onClick={() => onVote(proposal.id, 'reject')}
+                style={{ flex:1, padding:'10px', borderRadius:10, border:'none',
+                  cursor:'pointer', background:'rgba(207,95,95,0.12)',
+                  border:`1px solid rgba(207,95,95,0.3)`,
+                  fontSize:12, fontWeight:600, color:RED }}>
+                ✗ Reject
+              </button>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   )
 }
 

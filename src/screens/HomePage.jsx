@@ -25,7 +25,7 @@ function StatTile({ label, value, sub }) {
       padding:"12px 8px", textAlign:"center",
     }}>
       <div style={{
-        fontSize:8, color:TEXT_MUTED, letterSpacing:"0.08em",
+        fontSize:10, color:TEXT_MUTED, letterSpacing:"0.08em",
         textTransform:"uppercase", marginBottom:6, whiteSpace:"nowrap",
       }}>{label}</div>
       <div style={{fontSize:22, fontWeight:500, color:GOLD, lineHeight:1}}>{value}</div>
@@ -40,7 +40,7 @@ function ManagerCard({ data, type, punishment }) {
   const borderCol = isChamp ? GOLD : RED
   const accentCol = isChamp ? GOLD : RED
   const label = isChamp ? "2025 CHAMPION" : "2025 LAST PLACE"
-  const icon  = isChamp ? "🏆" : "💀"
+  const icon  = isChamp ? "🏆" : "💩"
   const wins   = data.wins   ?? 0
   const losses = data.losses ?? 0
   const ties   = data.ties   ?? 0
@@ -59,7 +59,7 @@ function ManagerCard({ data, type, punishment }) {
       marginBottom:10, overflow:"hidden",
     }}>
       <div style={{
-        fontSize:9, color:accentCol, letterSpacing:"0.12em",
+        fontSize:10, color:accentCol, letterSpacing:"0.12em",
         textTransform:"uppercase", padding:"9px 14px 4px",
         display:"flex", alignItems:"center", gap:5,
       }}>
@@ -142,10 +142,10 @@ export default function HomePage() {
       <div style={{
         padding:"20px 16px 12px",
         display:"flex", flexDirection:"column",
-        alignItems:"center", gap:10,
+        alignItems:"center", gap:5,
       }}>
         <img src="/icons/blackgold-logo.png" alt="BlackGold"
-          style={{width:240, height:240, borderRadius:18}}/>
+          style={{width:230, height:230, borderRadius:18}}/>
         <div style={{textAlign:"center"}}>
           <div style={{
             fontSize:28, fontWeight:500, color:GOLD,

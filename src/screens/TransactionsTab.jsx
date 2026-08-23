@@ -44,7 +44,7 @@ function SeasonNav({ years, currentYear, onChange }) {
           style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 16px', borderRadius:20,
             border:`1px solid ${GOLD_BORDER}`, background:GOLD_DIM, cursor:'pointer',
             fontSize:13, fontWeight:500, color:GOLD }}>
-          Season {currentYear} <span style={{ fontSize:9, color:TEXT_2 }}>▼</span>
+           {currentYear} <span style={{ fontSize:9, color:TEXT_2 }}>▼</span>
         </button>
         {showPicker && (
           <div style={{ position:'absolute', top:'110%', left:'50%', transform:'translateX(-50%)',
@@ -145,29 +145,30 @@ function MoveRow({ row }) {
   const m = row.add || row.drop
   const isAdd = row.type === 'add'
   return (
-    <div style={{ display:'flex', alignItems:'center', gap:10, padding:'9px 16px',
-      borderBottom:`0.5px solid rgba(212,168,67,0.06)`,
-      background:isAdd?'rgba(93,191,106,0.04)':'rgba(207,95,95,0.04)' }}>
-      <div style={{ width:32, height:32, borderRadius:6, flexShrink:0,
-        background:isAdd?'rgba(93,191,106,0.15)':'rgba(207,95,95,0.15)',
-        border:`1px solid ${isAdd?'rgba(93,191,106,0.3)':'rgba(207,95,95,0.3)'}`,
-        display:'flex', alignItems:'center', justifyContent:'center',
-        fontSize:10, fontWeight:700, color:isAdd?GREEN:RED }}>
-        {isAdd?'+':'–'}
+    <div style={{ borderBottom:`0.5px solid rgba(212,168,67,0.06)`,
+      background:isAdd?'rgba(93,191,106,0.02)':'rgba(207,95,95,0.02)' }}>
+      {/* Manager + date header */}
+      <div style={{ display:'flex', alignItems:'center', gap:6, padding:'7px 16px 3px' }}>
+        <Avatar managerId={m.manager_id} size={18}/>
+        <span style={{ fontSize:10, color:TEXT_2 }}>{m.display_name}</span>
+        {m.waiver_bid != null && (
+          <span style={{ fontSize:9, color:GOLD }}>FAAB ${m.waiver_bid}</span>
+        )}
+        <span style={{ fontSize:9, color:TEXT_3, marginLeft:'auto' }}>{m.date}</span>
       </div>
-      <div style={{ flex:1, minWidth:0 }}>
-        <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-          <span style={{ fontSize:13, fontWeight:500, color:TEXT_1 }}>{m.player_name}</span>
-          <PosChip pos={m.position}/>
-          <span style={{ fontSize:9, color:TEXT_3 }}>{m.nfl_team}</span>
+      {/* Add or drop row */}
+      <div style={{ display:'flex', alignItems:'center', gap:8, padding:'4px 16px 7px' }}>
+        <div style={{ width:18, height:18, borderRadius:4, flexShrink:0,
+          background:isAdd?'rgba(93,191,106,0.15)':'rgba(207,95,95,0.15)',
+          border:`1px solid ${isAdd?'rgba(93,191,106,0.3)':'rgba(207,95,95,0.3)'}`,
+          display:'flex', alignItems:'center', justifyContent:'center',
+          fontSize:9, fontWeight:700, color:isAdd?GREEN:RED }}>
+          {isAdd?'+':'–'}
         </div>
-        <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:3 }}>
-          <Avatar managerId={m.manager_id} size={18}/>
-          <span style={{ fontSize:10, color:TEXT_2 }}>{m.display_name}</span>
-          {m.waiver_bid != null && <span style={{ fontSize:9, color:GOLD }}>FAAB ${m.waiver_bid}</span>}
-        </div>
+        <span style={{ fontSize:12, fontWeight:500, color:TEXT_1 }}>{m.player_name}</span>
+        <PosChip pos={m.position}/>
+        <span style={{ fontSize:9, color:TEXT_3 }}>{m.nfl_team}</span>
       </div>
-      <div style={{ fontSize:9, color:TEXT_3, flexShrink:0 }}>{m.date}</div>
     </div>
   )
 }
@@ -346,7 +347,7 @@ export default function TransactionsTab({ years }) {
                 ].map(t => (
                   <div key={t.label} style={{ flex:1, background:BG_CARD, borderRadius:8,
                     border:`0.5px solid ${GOLD_BORDER}`, padding:'10px 8px', textAlign:'center' }}>
-                    <div style={{ fontSize:8, color:TEXT_3, letterSpacing:'0.08em', marginBottom:4 }}>{t.label}</div>
+                    <div style={{ fontSize:10, color:TEXT_3, letterSpacing:'0.08em', marginBottom:4 }}>{t.label}</div>
                     <div style={{ fontSize:22, fontWeight:500, color:GOLD }}>{t.value||0}</div>
                   </div>
                 ))}
@@ -356,7 +357,7 @@ export default function TransactionsTab({ years }) {
                 <div style={{ display:'grid', gridTemplateColumns:'60px 1fr 60px 60px',
                   padding:'7px 12px', borderBottom:`0.5px solid ${GOLD_BORDER}` }}>
                   {['Week','','Adds','Drops'].map((h,i) => (
-                    <span key={i} style={{ fontSize:8, color:TEXT_3, letterSpacing:'0.08em',
+                    <span key={i} style={{ fontSize:10, color:TEXT_3, letterSpacing:'0.08em',
                       textAlign:i>=2?'right':'left' }}>{h}</span>
                   ))}
                 </div>
@@ -367,7 +368,7 @@ export default function TransactionsTab({ years }) {
                       borderBottom:i<arr.length-1?`0.5px solid rgba(212,168,67,0.06)`:'none',
                       background:'transparent' }}>
                     <span style={{ fontSize:12, color:TEXT_2 }}>
-                      {w.week === 0 ? 'Pre' : `Wk ${w.week}`}
+                      {w.week === 0 ? 'Pre' : `Week ${w.week}`}
                     </span>
                     <div style={{ height:4, borderRadius:2, background:'rgba(212,168,67,0.1)',
                       overflow:'hidden', margin:'0 8px' }}>
@@ -388,7 +389,7 @@ export default function TransactionsTab({ years }) {
               <div style={{ display:'flex', gap:8, marginBottom:14 }}>
                 <div style={{ flex:1, background:BG_CARD, borderRadius:8,
                   border:`0.5px solid ${GOLD_BORDER}`, padding:'10px 8px', textAlign:'center' }}>
-                  <div style={{ fontSize:8, color:TEXT_3, letterSpacing:'0.08em', marginBottom:4 }}>Total Trades</div>
+                  <div style={{ fontSize:10, color:TEXT_3, letterSpacing:'0.08em', marginBottom:4 }}>Total Trades</div>
                   <div style={{ fontSize:28, fontWeight:500, color:GOLD }}>{summary.total_trades||0}</div>
                 </div>
               </div>
@@ -396,7 +397,7 @@ export default function TransactionsTab({ years }) {
                 <div style={{ display:'grid', gridTemplateColumns:'60px 1fr 60px',
                   padding:'7px 12px', borderBottom:`0.5px solid ${GOLD_BORDER}` }}>
                   {['Week','','Trades'].map((h,i) => (
-                    <span key={i} style={{ fontSize:8, color:TEXT_3, letterSpacing:'0.08em',
+                    <span key={i} style={{ fontSize:10, color:TEXT_3, letterSpacing:'0.08em',
                       textAlign:i>=2?'right':'left' }}>{h}</span>
                   ))}
                 </div>
@@ -430,7 +431,7 @@ export default function TransactionsTab({ years }) {
                 ].map(t => (
                   <div key={t.label} style={{ flex:1, background:BG_CARD, borderRadius:8,
                     border:`0.5px solid ${GOLD_BORDER}`, padding:'10px 8px', textAlign:'center' }}>
-                    <div style={{ fontSize:8, color:TEXT_3, letterSpacing:'0.08em', marginBottom:4 }}>{t.label}</div>
+                    <div style={{ fontSize:10, color:TEXT_3, letterSpacing:'0.08em', marginBottom:4 }}>{t.label}</div>
                     <div style={{ fontSize:18, fontWeight:500, color:GOLD }}>{t.value}</div>
                   </div>
                 ))}
@@ -441,11 +442,11 @@ export default function TransactionsTab({ years }) {
                   gridTemplateColumns:draft.draft_type==='auction'?'36px 36px 1fr 48px 44px':'36px 36px 1fr 48px',
                   padding:'7px 12px', borderBottom:`0.5px solid ${GOLD_BORDER}` }}>
                   {['#','',
-                    'Player',
-                    'Mgr',
+                    'PLAYER',
+                    'TEAM',
                     ...(draft.draft_type==='auction'?['$']:[])
                   ].map((h,i) => (
-                    <span key={i} style={{ fontSize:8, color:TEXT_3, letterSpacing:'0.08em',
+                    <span key={i} style={{ fontSize:10, color:TEXT_3, letterSpacing:'0.08em',
                       textAlign:i>=3?'right':'left' }}>{h}</span>
                   ))}
                 </div>

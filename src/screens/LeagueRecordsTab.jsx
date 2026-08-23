@@ -23,7 +23,7 @@ const ERA_LABELS  = {
 
 function SectionLabel({ label }) {
   return (
-    <div style={{ fontSize:9, color:TEXT_3, letterSpacing:'0.12em',
+    <div style={{ fontSize:14, color:TEXT_3, letterSpacing:'0.12em',
       textTransform:'uppercase', padding:'16px 14px 6px' }}>
       {label}
     </div>
@@ -136,11 +136,11 @@ function FranchiseRecords({ data }) {
       { key:'most_championships',       label:'Most Championships',      icon:'🏆' },
       { key:'most_last_place',          label:'Most Last Place',         icon:'💩' },
     ],[
-      { key:'most_regular_season_wins', label:'Most RS Wins',            icon:'📈' },
-      { key:'most_playoff_wins',        label:'Most Playoff Wins',       icon:'🏅' },
+      { key:'most_regular_season_wins', label:'Most Regular Season Wins' },
+      { key:'most_playoff_wins',        label:'Most Playoff Wins' },
     ],[
-      { key:'most_playoff_appearances', label:'Most Playoff Apps',       icon:'🎯' },
-      { key:'most_finals_appearances',  label:'Most Finals Apps',        icon:'⭐' },
+      { key:'most_playoff_appearances', label:'Most Playoff Apps' },
+      { key:'most_finals_appearances',  label:'Most Finals Apps' },
     ],
   ]
   return (
@@ -184,38 +184,38 @@ function ScoringRecords({ data }) {
 
   const ptsVal = r => `${r.avg_pf ?? r.points ?? r.total_pf} pts${r.avg_pf ? '/g' : ''}`
   const seaSub = r => `${r.display_name} · ${r.year}`
-  const wkSub  = r => `${r.display_name} · ${r.year} Wk ${r.week}`
+  const wkSub  = r => `${r.display_name} · ${r.year} Week ${r.week}`
 
   return (
     <>
       <SectionLabel label="Scoring Records" />
       <EraToggle eras={eras} value={era} onChange={setEra}/>
-      <div style={{ fontSize:9, color:TEXT_3, padding:'4px 14px 2px', letterSpacing:'0.08em' }}>
+      <div style={{ fontSize:11, color:TEXT_3, padding:'4px 14px 2px', letterSpacing:'0.08em' }}>
         {ERA_LABELS[era]}
       </div>
 
       {/* Season section */}
-      <div style={{ fontSize:9, color:TEXT_3, letterSpacing:'0.1em', padding:'8px 14px 4px' }}>SEASON</div>
+      <div style={{ fontSize:11, color:TEXT_3, letterSpacing:'0.1em', padding:'8px 14px 4px' }}>SEASON</div>
       <Card>
         <ScoringPairRow
-          labelA="🔝 Best Season Avg" labelB="📉 Worst Season Avg"
+          labelA="Best Season" labelB="Worst Season"
           recA={d.top_season_pf_avg?.[0]} recB={d.bottom_season_pf_avg?.[0]}
-          valFn={r=>`${r.avg_pf} pts/g`} subFn={seaSub}/>
+          valFn={r=>`${r.avg_pf} ppg`} subFn={seaSub}/>
         <ScoringPairRow
-          labelA="🛡️ Best PA Avg" labelB="😬 Worst PA Avg"
+          labelA="Highest PA Average" labelB="Lowest PA Average"
           recA={d.top_season_pa_avg?.[0]} recB={d.bottom_season_pa_avg?.[0]}
-          valFn={r=>`${r.avg_pa} pts/g`} subFn={seaSub} last/>
+          valFn={r=>`${r.avg_pa} ppg`} subFn={seaSub} last/>
       </Card>
 
       {/* Weekly section */}
-      <div style={{ fontSize:9, color:TEXT_3, letterSpacing:'0.1em', padding:'8px 14px 4px' }}>WEEKLY</div>
+      <div style={{ fontSize:11, color:TEXT_3, letterSpacing:'0.1em', padding:'8px 14px 4px' }}>WEEKLY</div>
       <Card>
         <ScoringPairRow
-          labelA="🔥 Highest Week" labelB="🥶 Lowest Week"
+          labelA="Highest Week" labelB="Lowest Week"
           recA={d.highest_weekly_pf?.[0]} recB={d.lowest_weekly_pf?.[0]}
           valFn={r=>`${r.points} pts`} subFn={wkSub}/>
         <ScoringPairRow
-          labelA="🏆 Highest Playoff Wk" labelB="💀 Lowest Playoff Wk"
+          labelA="Highest Playoff Week" labelB="Lowest Playoff Week"
           recA={d.highest_playoff_pf?.[0]} recB={d.lowest_playoff_pf?.[0]}
           valFn={r=>`${r.points} pts`} subFn={wkSub} last/>
       </Card>
@@ -245,7 +245,7 @@ function PositionRecords({ data }) {
       {/* Best Week */}
       {eraData.best_week && (
         <>
-          <div style={{ fontSize:9, color:TEXT_3, letterSpacing:'0.1em', padding:'10px 14px 4px' }}>
+          <div style={{ fontSize:11, color:TEXT_3, letterSpacing:'0.1em', padding:'10px 14px 4px' }}>
             BEST SINGLE WEEK
           </div>
           <Card>
@@ -258,7 +258,7 @@ function PositionRecords({ data }) {
                   <div style={{ flex:1, minWidth:0 }}>
                     <div style={{ fontSize:12, fontWeight:500, color:TEXT_1 }}>{r.player_name}</div>
                     <div style={{ fontSize:9, color:TEXT_2 }}>
-                      {r.display_name} · {r.nfl_team} · {r.year} Wk {r.week}
+                      {r.display_name} · {r.nfl_team} · {r.year} Week {r.week}
                     </div>
                   </div>
                   <div style={{ fontSize:14, fontWeight:600, color:GOLD }}>{r.points}</div>
@@ -272,7 +272,7 @@ function PositionRecords({ data }) {
       {/* Best Season */}
       {eraData.best_season && (
         <>
-          <div style={{ fontSize:9, color:TEXT_3, letterSpacing:'0.1em', padding:'10px 14px 4px' }}>
+          <div style={{ fontSize:11, color:TEXT_3, letterSpacing:'0.1em', padding:'10px 14px 4px' }}>
             BEST SEASON TOTAL
           </div>
           <Card>
@@ -315,7 +315,7 @@ function DraftRecords({ data }) {
       {/* Most drafted players by position */}
       {data.most_drafted_players && (
         <>
-          <div style={{ fontSize:9, color:TEXT_3, letterSpacing:'0.1em', padding:'6px 14px 4px' }}>
+          <div style={{ fontSize:11, color:TEXT_3, letterSpacing:'0.1em', padding:'6px 14px 4px' }}>
             MOST DRAFTED PLAYERS
           </div>
           {Object.entries(data.most_drafted_players).map(([pos, players]) => (
@@ -376,7 +376,7 @@ function TransactionRecords({ data }) {
 
       {data.biggest_faab_bids?.length > 0 && (
         <>
-          <div style={{ fontSize:9, color:TEXT_3, letterSpacing:'0.1em', padding:'6px 14px 4px' }}>
+          <div style={{ fontSize:11, color:TEXT_3, letterSpacing:'0.1em', padding:'6px 14px 4px' }}>
             BIGGEST FAAB BIDS
           </div>
           <Card>
@@ -398,7 +398,7 @@ function TransactionRecords({ data }) {
 
       {data.most_moves_season?.length > 0 && (
         <>
-          <div style={{ fontSize:9, color:TEXT_3, letterSpacing:'0.1em', padding:'10px 14px 4px' }}>
+          <div style={{ fontSize:11, color:TEXT_3, letterSpacing:'0.1em', padding:'10px 14px 4px' }}>
             MOST MOVES IN A SEASON
           </div>
           <Card>
@@ -412,7 +412,7 @@ function TransactionRecords({ data }) {
 
       {data.most_trades_season?.length > 0 && (
         <>
-          <div style={{ fontSize:9, color:TEXT_3, letterSpacing:'0.1em', padding:'10px 14px 4px' }}>
+          <div style={{ fontSize:11, color:TEXT_3, letterSpacing:'0.1em', padding:'10px 14px 4px' }}>
             MOST TRADES IN A SEASON
           </div>
           <Card>
@@ -489,7 +489,7 @@ function ChampionshipRosterRecords({ data }) {
       {/* Top 5 players */}
       {data.top_5_players?.length > 0 && (
         <>
-          <div style={{ fontSize:9, color:TEXT_3, letterSpacing:'0.1em', padding:'6px 14px 4px' }}>
+          <div style={{ fontSize:11, color:TEXT_3, letterSpacing:'0.1em', padding:'6px 14px 4px' }}>
             MOST CHAMPIONSHIP APPEARANCES
           </div>
           <Card>

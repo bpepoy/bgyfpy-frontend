@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import SectionNav from '../components/shell/SectionNav'
 import LeagueRecordsTab from './LeagueRecordsTab'
+import Avatar from '../components/Avatar'
 
 const API = 'https://bgyfpy-backend.onrender.com'
 
@@ -30,7 +31,7 @@ const TABS = [
 function SectionHeader({ label }) {
   return (
     <div style={{
-      fontSize: 9, color: TEXT_3, letterSpacing: '0.12em',
+      fontSize: 14, color: TEXT_3, letterSpacing: '0.12em',
       textTransform: 'uppercase', padding: '16px 14px 6px',
     }}>
       {label}
@@ -221,7 +222,7 @@ function LeagueRulesTab({ data }) {
       )}
 
       {segment === 'scoring' && (() => {
-        const scoringData = rules?.scoring_by_position_type || {}
+        const scoringData = data?.scoring_by_position_type || {}
  
         const OFFENSE_ORDER = [4, 5, 6, 11, 9, 12, 10, 13, 16, 18, 57]
         const DEFENSE_ORDER = [32, 33, 34, 36, 37, 82, 67, 35, 15, 49, 50, 51, 52, 53, 54, 55, 56]
@@ -253,9 +254,9 @@ function LeagueRulesTab({ data }) {
  
         return (
           <div>
-            <SectionLabel label="Offense"/>
+            <SectionHeader label="Offense"/>
             <Card>{renderStats(offenseStats)}</Card>
-            <SectionLabel label="Defense / Special Teams"/>
+            <SectionHeader label="Defense / Special Teams"/>
             <Card>{renderStats(defenseStats)}</Card>
           </div>
         )
@@ -297,7 +298,7 @@ function LeagueRulesTab({ data }) {
               <Row
                 key={k}
                 label={formatLabel(k)}
-                value={typeof v === 'number' && k.includes('week') ? `${v}` : `$${v}`}
+                value={typeof v === 'number' && k.includes('week') ? `$${v}` : `$${v}`}
                 last={i === weeklyPrizes.length - 1}
               />
             ))}
@@ -379,7 +380,6 @@ function SeasonCard({ season, isOpen, onOpen }) {
           <div style={{ fontSize: 13, fontWeight: 500, color: TEXT_1, display: 'flex', alignItems: 'center', gap: 8 }}>
             <Avatar managerId={champ.manager_id} size={28}/>
             {champ.display_name}
-          </div>
           </div>
           <div style={{ fontSize: 10, color: TEXT_2, marginTop: 2 }}>
             {champ.team_name} · {fmtRecord(champ)}

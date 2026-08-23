@@ -95,13 +95,27 @@ function ParlaysTab({ currentUser }) {
   const user = currentUser
   const canManage   = CAN_MANAGE.includes(user.manager_id)
   const [view, setView]         = useState(canManage ? 'view' : 'view')
-  const [season, setSeason]     = useState(2026)
-  const [week, setWeek]         = useState(1)
+  const [season, setSeason]     = useState(null)
+  const [week, setWeek]         = useState(null)
   const [parlay, setParlay]     = useState(null)
   const [options, setOptions]   = useState(null)
   const [loading, setLoading]   = useState(false)
   const [availableWeeks, setAvailableWeeks] = useState([])
   const [seasons, setSeasons]   = useState([2026])
+
+  // Auto-detect current season and week on mount
+  useEffect(() => {
+    fetch(`${API}/betting/parlays`)
+      .then(r => r.json())
+      .then(d => {
+        if (d.season) setSeason(d.season)
+        if (d.week)   setWeek(d.week)
+      })
+      .catch(() => {
+        setSeason(2026)
+        setWeek(1)
+      })
+  }, [])
 
   // Manage parlay state
   const [legs, setLegs]         = useState({})
@@ -109,26 +123,28 @@ function ParlaysTab({ currentUser }) {
   const [saveStatus, setSaveStatus] = useState(null)
 
   useEffect(() => {
-    fetch(`${API}/betting/parlay-options`)
-      .then(r=>r.json()).then(setOptions).catch(()=>{})
-  }, [])
+  if (!season || !week) return
+  setLoading(true)
+  fetch(`${API}/betting/parlays?season=${season}&week=${week}`)
+    .then(r=>r.json())
+    .then(d => {
+      setParlay(d)
+      setAvailableWeeks(d.available_weeks||[])
+      const allSeasons = [...new Set((d.available_weeks||[]).map(w=>w.season))].sort((a,b)=>b-a)
+      if (allSeasons.length) setSeasons(allSeasons)
+      const legMap = {}
+      ;(d.parlay?.legs||[]).forEach(l => { legMap[l.manager_id] = {...l} })
+      setLegs(legMap)
+      setLoading(false)
+    }).catch(() => setLoading(false))
+  }, [season, week])
 
   useEffect(() => {
-    setLoading(true)
-    fetch(`${API}/betting/parlays?season=${season}&week=${week}`)
-      .then(r=>r.json())
-      .then(d => {
-        setParlay(d)
-        setAvailableWeeks(d.available_weeks||[])
-        const allSeasons = [...new Set((d.available_weeks||[]).map(w=>w.season))].sort((a,b)=>b-a)
-        if (allSeasons.length) setSeasons(allSeasons)
-        // Init leg state from existing data
-        const legMap = {}
-        ;(d.parlay?.legs||[]).forEach(l => { legMap[l.manager_id] = {...l} })
-        setLegs(legMap)
-        setLoading(false)
-      }).catch(() => setLoading(false))
-  }, [season, week])
+  fetch(`${API}/betting/parlay-options`)
+    .then(r => r.json())
+    .then(d => setOptions(d))
+    .catch(() => {})
+  }, [])
 
   const updateLeg = (managerId, field, value) => {
     setLegs(prev => ({ ...prev, [managerId]: { ...prev[managerId], [field]:value } }))
@@ -271,7 +287,7 @@ function ParlaysTab({ currentUser }) {
                         style={{ padding:'7px 6px', borderRadius:8,
                           border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
                           color:leg.stat_op?TEXT_1:TEXT_3, fontSize:11, cursor:'pointer' }}>
-                        <option value="">Op</option>
+                        <option value="">O/U</option>
                         {(options?.stat_operations||[]).map(o =>
                           <option key={o.value} value={o.value}>{o.label}</option>)}
                       </select>

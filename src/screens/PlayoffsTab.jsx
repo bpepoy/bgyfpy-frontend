@@ -50,7 +50,7 @@ function SeasonNav({ years, currentYear, onChange }) {
           style={{ display:'flex', alignItems:'center', gap:8, padding:'7px 16px', borderRadius:20,
             border:`1px solid ${GOLD_BORDER}`, background:GOLD_DIM, cursor:'pointer',
             fontSize:13, fontWeight:500, color:GOLD }}>
-          Season {currentYear} <span style={{ fontSize:9, color:TEXT_2 }}>▼</span>
+           {currentYear} <span style={{ fontSize:9, color:TEXT_2 }}>▼</span>
         </button>
         {showPicker && (
           <div style={{ position:'absolute', top:'110%', left:'50%', transform:'translateX(-50%)',
@@ -208,7 +208,14 @@ function Connector() {
 // ── Champion roster ───────────────────────────────────────────────────────────
 function ChampionRoster({ roster }) {
   if (!roster) return null
-  const starters = (roster.players||[]).filter(p=>p.is_starting&&!p.is_on_bench)
+  const POS_ORDER = ['QB','WR','RB','TE','W/R/T','W/R','K','DEF']
+  const starters = (roster.players||[])
+    .filter(p=>p.is_starting&&!p.is_on_bench)
+    .sort((a,b)=>{
+      const ai = POS_ORDER.indexOf(a.selected_position||a.position)
+      const bi = POS_ORDER.indexOf(b.selected_position||b.position)
+      return (ai===-1?99:ai) - (bi===-1?99:bi)
+    })
   const bench    = (roster.players||[]).filter(p=>p.is_on_bench)
   return (
     <div style={{ margin:'16px 14px 0' }}>

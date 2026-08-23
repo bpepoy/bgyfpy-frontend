@@ -54,7 +54,7 @@ function H2HModal({ mgr1, mgr2, onClose }) {
   const rs      = data?.regular_season || {}
   const po      = data?.playoffs || {}
   const streak  = data?.rs_current_streak
-  const allMatchups = data?.matchups || data?.last_5?.matchups || []
+  const allMatchups = data?.matchups || data?.all_matchups || data?.last_5?.matchups || []
 
   const mgr1Name = data?.[mgr1]?.display_name || INITIALS[mgr1] || mgr1
   const mgr2Name = data?.[mgr2]?.display_name || INITIALS[mgr2] || mgr2
@@ -127,13 +127,13 @@ function H2HModal({ mgr1, mgr2, onClose }) {
           {/* Stat cards */}
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:6, marginBottom:10 }}>
             {[
-              { label:'RS Games',  value:rs.games??'—' },
-              { label:'Avg PF',    value:rs.avg_pf?.toFixed(1)??'—', gold:true },
-              { label:'Avg PA',    value:rs.avg_pa?.toFixed(1)??'—' },
-              { label:'PO Record', value:po.games?(po.wins+'-'+po.losses):'—' },
-              { label:'Avg Diff',  value:rs.avg_diff!=null?`${rs.avg_diff>0?'+':''}${rs.avg_diff.toFixed(1)}`:'—',
+              { label:'Regular Season Games',  value:rs.games??'—' },
+              { label:'PF / G',    value:rs.avg_pf?.toFixed(1)??'—', gold:true },
+              { label:'PA / G',    value:rs.avg_pa?.toFixed(1)??'—' },
+              { label:'Playoff Record', value:po.games?(po.wins+'-'+po.losses):'—' },
+              { label:'Points Diff',  value:rs.avg_diff!=null?`${rs.avg_diff>0?'+':''}${rs.avg_diff.toFixed(1)}`:'—',
                 color:rs.avg_diff>0?GREEN:rs.avg_diff<0?RED:TEXT_2 },
-              { label:'Total',     value:data.total_matchups??'—' },
+              { label:'Total Games',     value:data.total_matchups??'—' },
             ].map(s => (
               <div key={s.label} style={{ background:BG_CARD, border:`0.5px solid rgba(212,168,67,0.18)`,
                 borderRadius:9, padding:'8px 6px', textAlign:'center' }}>
@@ -279,9 +279,6 @@ function H2HModal({ mgr1, mgr2, onClose }) {
                               <div style={{ fontSize:9, color:TEXT_2, lineHeight:1.3 }}>
                                 {pla.name?.split(' ').pop()}
                               </div>
-                              {pla.is_on_bench && (
-                                <div style={{ fontSize:7, color:'#5B9BD5' }}>BN</div>
-                              )}
                             </> : <div style={{ fontSize:9, color:TEXT_3 }}>—</div>}
                           </div>
                           {/* Pos badge */}
@@ -302,9 +299,6 @@ function H2HModal({ mgr1, mgr2, onClose }) {
                               <div style={{ fontSize:9, color:TEXT_2, lineHeight:1.3 }}>
                                 {plb.name?.split(' ').pop()}
                               </div>
-                              {plb.is_on_bench && (
-                                <div style={{ fontSize:7, color:'#5B9BD5', textAlign:'right' }}>BN</div>
-                              )}
                             </> : <div style={{ fontSize:9, color:TEXT_3 }}>—</div>}
                           </div>
                         </div>
@@ -343,7 +337,7 @@ function H2HGrid({ managers, current, era, onSelectCell }) {
   return (
     <div>
       {/* RS Grid */}
-      <div style={{ fontSize:9, color:TEXT_3, letterSpacing:'0.1em', padding:'12px 14px 6px' }}>
+      <div style={{ fontSize:14, color:TEXT_3, letterSpacing:'0.1em', padding:'12px 14px 6px' }}>
         REGULAR SEASON RECORD
       </div>
       <div style={{ margin:'0 14px', overflowX:'auto' }}>
@@ -412,7 +406,7 @@ function H2HGrid({ managers, current, era, onSelectCell }) {
       </div>
 
       {/* PO Grid */}
-      <div style={{ fontSize:9, color:TEXT_3, letterSpacing:'0.1em', padding:'16px 14px 6px' }}>
+      <div style={{ fontSize:14, color:TEXT_3, letterSpacing:'0.1em', padding:'16px 14px 6px' }}>
         PLAYOFF RECORD
       </div>
       <div style={{ margin:'0 14px', overflowX:'auto' }}>

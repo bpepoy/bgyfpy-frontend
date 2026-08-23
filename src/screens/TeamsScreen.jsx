@@ -41,7 +41,7 @@ const TABS = [
 
 function SectionLabel({ label }) {
   return (
-    <div style={{ fontSize:9, color:TEXT_3, letterSpacing:'0.12em',
+    <div style={{ fontSize:14, color:TEXT_3, letterSpacing:'0.12em',
       textTransform:'uppercase', padding:'14px 14px 6px' }}>{label}</div>
   )
 }
@@ -97,10 +97,10 @@ function OverviewTab({ data }) {
         {/* Stats grid */}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', padding:'10px 14px', gap:8 }}>
           {[
-            { label:'RS Record',    value:rsRecord },
-            { label:'PO Record',    value:poRecord },
-            { label:'Playoff Apps', value:m.playoff_apps },
-            { label:'Championships',value:m.championships },
+            { label:'REGULAR SEASON',    value:rsRecord },
+            { label:'PLAYOFFS',    value:poRecord },
+            { label:'PLAYOFF APPS', value:m.playoff_apps },
+            { label:'CHAMPIONSHIPS',value:m.championships },
           ].map(s => (
             <div key={s.label} style={{ textAlign:'center' }}>
               <div style={{ fontSize:8, color:TEXT_3, letterSpacing:'0.08em', marginBottom:3 }}>{s.label}</div>
@@ -139,29 +139,29 @@ const ERA_OPTIONS = [
 const RS_COLS = [
   { key:'wins',              label:'W',       fn:m=>m.regular_season?.wins??'—' },
   { key:'losses',            label:'L',       fn:m=>m.regular_season?.losses??'—' },
-  { key:'avg_pf',            label:'PF/G',    fn:m=>m.regular_season?.avg_pf?.toFixed(1)??'—', gold:true },
-  { key:'avg_pa',            label:'PA/G',    fn:m=>m.regular_season?.avg_pa?.toFixed(1)??'—' },
   { key:'avg_finish',        label:'Avg Fin', fn:m=>m.regular_season?.avg_finish?.toFixed(1)??'—' },
+  { key:'avg_pf',            label:'PF/G',    fn:m=>m.regular_season?.avg_pf?.toFixed(1)??'—', gold:true },
   { key:'avg_pf_rank',       label:'PF Rank', fn:m=>m.regular_season?.avg_pf_rank?.toFixed(1)??'—', gold:true },
+  { key:'avg_pa',            label:'PA/G',    fn:m=>m.regular_season?.avg_pa?.toFixed(1)??'—' },
   { key:'avg_pa_rank',       label:'PA Rank', fn:m=>m.regular_season?.avg_pa_rank?.toFixed(1)??'—' },
-  { key:'proj_diff',         label:'Proj Δ',  fn:m=>m.regular_season?.proj_vs_actual_diff?.toFixed(1)??'—' },
+  // { key:'proj_diff',         label:'Proj Δ',  fn:m=>m.regular_season?.proj_vs_actual_diff?.toFixed(1)??'—' },
 ]
 const PO_COLS = [
   { key:'po_wins',           label:'W',       fn:m=>m.playoffs?.wins??'—' },
   { key:'po_losses',         label:'L',       fn:m=>m.playoffs?.losses??'—' },
   { key:'po_avg_pf',         label:'PF/G',    fn:m=>m.playoffs?.avg_pf?.toFixed(1)??'—', gold:true },
-  { key:'po_avg_pa',         label:'PA/G',    fn:m=>m.playoffs?.avg_pa?.toFixed(1)??'—' },
   { key:'po_pf_rank',        label:'PF Rank', fn:m=>m.playoffs?.avg_pf_rank?.toFixed(1)??'—', gold:true },
+  { key:'po_avg_pa',         label:'PA/G',    fn:m=>m.playoffs?.avg_pa?.toFixed(1)??'—' },
   { key:'po_pa_rank',        label:'PA Rank', fn:m=>m.playoffs?.avg_pa_rank?.toFixed(1)??'—' },
 ]
 const EXTRA_COLS = [
-  { key:'wk_hi_total',       label:'Wk Hi',   fn:m=>m.weekly_high_total_wins??'—', gold:true },
-  { key:'wk_hi_pos',         label:'Pos Hi',  fn:m=>m.weekly_high_pos_wins??'—' },
+  { key:'wk_hi_total',       label:'Week HP',   fn:m=>m.weekly_high_total_wins??'—', gold:true },
+  { key:'wk_hi_pos',         label:'POS HP',  fn:m=>m.weekly_high_pos_wins??'—' },
   { key:'ices',              label:'Ices',    fn:m=>m.ices_regular_season??'—' },
-  { key:'winnings',          label:'$Won',    fn:m=>m.total_winnings?`$${m.total_winnings}`:'—', gold:true },
+  { key:'winnings',          label:'$ Won',    fn:m=>m.total_winnings?`$${m.total_winnings}`:'—', gold:true },
 ]
 const RESULT_VIEWS = [
-  { key:'rs',     label:'Reg Season', cols:RS_COLS },
+  { key:'rs',     label:'Regular Season', cols:RS_COLS },
   { key:'po',     label:'Playoffs',   cols:PO_COLS },
   { key:'extras', label:'Extras',     cols:EXTRA_COLS },
 ]
@@ -341,7 +341,7 @@ function TxCard({ m }) {
           {m.best_faab_bid && (
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
               <span style={{ fontSize:10, color:TEXT_2 }}>
-                💰 Best FAAB — {m.best_faab_bid.player_name} ({m.best_faab_bid.year})
+                💰 Biggest FAAB — {m.best_faab_bid.player_name} ({m.best_faab_bid.year})
               </span>
               <span style={{ fontSize:11, fontWeight:500, color:GOLD }}>${m.best_faab_bid.bid}</span>
             </div>
@@ -349,7 +349,7 @@ function TxCard({ m }) {
           {m.best_auction_bid && (
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
               <span style={{ fontSize:10, color:TEXT_2 }}>
-                🔨 Best Auction — {m.best_auction_bid.player_name} ({m.best_auction_bid.year})
+                🔨 Biggest Auction — {m.best_auction_bid.player_name} ({m.best_auction_bid.year})
               </span>
               <span style={{ fontSize:11, fontWeight:500, color:GOLD }}>${m.best_auction_bid.cost}</span>
             </div>

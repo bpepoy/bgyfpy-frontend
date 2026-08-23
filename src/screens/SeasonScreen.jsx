@@ -137,7 +137,7 @@ function StandingsTab({ allSeasons }) {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         gap: 8, padding: '4px 14px 8px',
       }}>
-        <span style={{ fontSize: 10, color: TEXT_3, letterSpacing: '0.1em' }}>
+        <span style={{ fontSize: 11, color: TEXT_3, letterSpacing: '0.1em' }}>
           {isFinished ? 'FINAL STANDINGS' : 'CURRENT STANDINGS'}
         </span>
         {!isFinished && (
@@ -152,13 +152,13 @@ function StandingsTab({ allSeasons }) {
       {/* Header row */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '28px 36px 1fr 1fr 44px 44px 44px',
+        gridTemplateColumns: '28px 36px 1fr 1fr 44px 44px',
         padding: '6px 14px',
         borderBottom: `0.5px solid ${GOLD_BORDER}`,
       }}>
-        {['#', '', 'Manager', 'Team', 'PF/G', hasProj ? 'PROJ' : '', 'PA/G'].map((h, i) => (
+        {['#', 'Manager', '', '', 'PF/G', 'PA/G'].map((h, i) => (
           <span key={i} style={{
-            fontSize: 8, color: TEXT_3, letterSpacing: '0.08em',
+            fontSize: 9, color: TEXT_3, letterSpacing: '0.08em',
             textTransform: 'uppercase', textAlign: i >= 3 ? 'right' : 'left',
           }}>{h}</span>
         ))}
@@ -177,7 +177,7 @@ function StandingsTab({ allSeasons }) {
             <div key={mgr.manager_id}>
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: '28px 36px 1fr 1fr 44px 44px 44px',
+                gridTemplateColumns: '28px 36px 1fr 1fr 44px 44px',
                 padding: '9px 14px', alignItems: 'center',
                 background: inPlayoffs
                   ? 'rgba(93,191,106,0.04)'
@@ -209,7 +209,7 @@ function StandingsTab({ allSeasons }) {
                 </div>
 
                 {/* Team name column */}
-                <div style={{ minWidth: 0 }}>
+                <div style={{ minWidth: 0, marginLeft: '-50px'}}>
                   <div style={{
                     fontSize: 13, fontWeight: 500, color: TEXT_2,
                     overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
@@ -224,13 +224,6 @@ function StandingsTab({ allSeasons }) {
                   textAlign: 'right', fontWeight: 500,
                 }}>
                   {mgr.points_for_avg?.toFixed(1) || '—'}
-                </span>
-
-                {/* PROJ/G */}
-                <span style={{
-                  fontSize: 11, color: TEXT_2, textAlign: 'right',
-                }}>
-                  {hasProj && mgr.projected_avg ? mgr.projected_avg.toFixed(1) : '—'}
                 </span>
 
                 {/* PA/G */}

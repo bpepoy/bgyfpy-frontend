@@ -67,7 +67,7 @@ function Card({children,style}) {
 
 function SectionLabel({label}) {
   return (
-    <div style={{fontSize:9,color:TEXT_3,letterSpacing:'0.12em',
+    <div style={{fontSize:14,color:TEXT_3,letterSpacing:'0.12em',
       textTransform:'uppercase',padding:'14px 14px 6px'}}>{label}</div>
   )
 }
@@ -192,7 +192,7 @@ function OverviewTab({name}) {
         <Avatar managerId={name} photoUrl={data.photo_url} size={64}/>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontSize:20,fontWeight:500,color:TEXT_1}}>{data.display_name}</div>
-          <div style={{fontSize:11,color:TEXT_2,marginTop:3,letterSpacing:'0.08em',textTransform:'uppercase'}}>
+          <div style={{fontSize:12,color:TEXT_2,marginTop:3,letterSpacing:'0.08em',textTransform:'uppercase'}}>
             {data.display_name}'s Career Overview
           </div>
           <div style={{fontSize:10,color:TEXT_3,marginTop:2}}>{data.seasons_played} seasons played</div>
@@ -212,9 +212,9 @@ function OverviewTab({name}) {
             {label:'Last Place',value:ac.last_places||0,color:RED,sub:ac.last_place_years?.join(', ')},
           ].map(s=>(
             <div key={s.label} style={{textAlign:'center'}}>
-              <div style={{fontSize:8,color:TEXT_3,letterSpacing:'0.08em',marginBottom:3}}>{s.label}</div>
+              <div style={{fontSize:11,color:TEXT_3,letterSpacing:'0.08em',marginBottom:3}}>{s.label}</div>
               <div style={{fontSize:18,fontWeight:600,color:s.color}}>{s.value}</div>
-              {s.sub&&<div style={{fontSize:8,color:TEXT_3,marginTop:2}}>{s.sub}</div>}
+              {s.sub&&<div style={{fontSize:9,color:TEXT_3,marginTop:2}}>{s.sub}</div>}
             </div>
           ))}
         </div>
@@ -226,9 +226,9 @@ function OverviewTab({name}) {
           accent={rs.win_pct>=0.5?GREEN:RED}/>
         <StatRow label="Win %" value={`${((rs.win_pct||0)*100).toFixed(1)}%`}
           sub={rs.wins_rank} accent={rs.win_pct>=0.5?GREEN:RED}/>
-        <StatRow label="Avg PF" value={rs.avg_pf?.toFixed(1)||'—'}
+        <StatRow label="Average PF" value={rs.avg_pf?.toFixed(1)||'—'}
           sub={rs.avg_pf_rank} accent={GOLD}/>
-        <StatRow label="Avg PA" value={rs.avg_pa?.toFixed(1)||'—'}/>
+        <StatRow label="Average PA" value={rs.avg_pa?.toFixed(1)||'—'}/>
         <StatRow label="Games Played" value={rs.games||'—'} last/>
       </Card>
 
@@ -237,7 +237,7 @@ function OverviewTab({name}) {
         <StatRow label="Record" value={fmtRecord(po.wins,po.losses,po.ties)}
           accent={po.win_pct>=0.5?GREEN:RED}/>
         <StatRow label="Win %" value={po.win_pct!=null?`${(po.win_pct*100).toFixed(1)}%`:'—'}/>
-        <StatRow label="Avg PF" value={po.avg_pf?.toFixed(1)||'—'}
+        <StatRow label="Average PF" value={po.avg_pf?.toFixed(1)||'—'}
           sub={po.avg_pf_rank} accent={GOLD}/>
         <StatRow label="Appearances" value={po.appearances||ac.playoff_appearances||'—'} last/>
       </Card>
@@ -326,7 +326,7 @@ function ResultsTab({name}) {
             <StatRow label="Win %" value={rsRec.win_pct!=null?`${(rsRec.win_pct*100).toFixed(1)}%`:'—'}
               sub={rsWinsRank}/>
             {view==='era' && rsRec.avg_finish&&(
-              <StatRow label="Avg Finish" value={rsRec.avg_finish?.toFixed(1)||'—'}/>
+              <StatRow label="Average Finish" value={rsRec.avg_finish?.toFixed(1)||'—'}/>
             )}
             {rsRec.best_season&&(
               <StatRow label="Best Season"
@@ -342,33 +342,33 @@ function ResultsTab({name}) {
 
           <SectionLabel label="Regular Season Points"/>
           <Card>
-            <StatRow label="Avg PF / Game" value={rsPts.avg_pf?.toFixed(1)||'—'}
+            <StatRow label="Average PF/G" value={rsPts.avg_pf?.toFixed(1)||'—'}
               sub={rsPfRank} accent={GOLD}/>
-            <StatRow label="Avg PA / Game" value={rsPts.avg_pa?.toFixed(1)||'—'}
+            <StatRow label="Average PA/G" value={rsPts.avg_pa?.toFixed(1)||'—'}
               sub={rsPaRank}/>
-            <StatRow label="Avg Projected" value={rsPts.avg_proj_pf?.toFixed(1)||'—'}/>
-            <StatRow label="Actual vs Proj"
+            <StatRow label="Projected PF/G" value={rsPts.avg_proj_pf?.toFixed(1)||'—'}/>
+            <StatRow label="Actual PF vs Proj PF"
               value={rsPts.actual_vs_proj!=null
                 ?`${rsPts.actual_vs_proj>0?'+':''}${rsPts.actual_vs_proj.toFixed(2)}`:'—'}
               accent={rsPts.actual_vs_proj>=0?GREEN:RED}/>
             {rsPts.best_week&&(
               <StatRow label="Best Week" value={`${rsPts.best_week.points} pts`}
-                sub={rsPts.best_week.year ? `${rsPts.best_week.year} Wk ${rsPts.best_week.week}` : `Wk ${rsPts.best_week.week}`}
+                sub={rsPts.best_week.year ? `${rsPts.best_week.year} Week ${rsPts.best_week.week}` : `Week ${rsPts.best_week.week}`}
                 accent={GREEN}/>
             )}
             {rsPts.worst_week&&(
               <StatRow label="Worst Week" value={`${rsPts.worst_week.points} pts`}
-                sub={rsPts.worst_week.year ? `${rsPts.worst_week.year} Wk ${rsPts.worst_week.week}` : `Wk ${rsPts.worst_week.week}`}
+                sub={rsPts.worst_week.year ? `${rsPts.worst_week.year} Week ${rsPts.worst_week.week}` : `Week ${rsPts.worst_week.week}`}
                 accent={RED}/>
             )}
             {rsPts.best_season_avg&&(
-              <StatRow label="Best Season Avg"
-                value={`${rsPts.best_season_avg.avg_pf} pts/g`}
+              <StatRow label="Best Season PF/G"
+                value={`${rsPts.best_season_avg.avg_pf} ppg`}
                 sub={String(rsPts.best_season_avg.year)} accent={GREEN}/>
             )}
             {rsPts.worst_season_avg&&(
-              <StatRow label="Worst Season Avg"
-                value={`${rsPts.worst_season_avg.avg_pf} pts/g`}
+              <StatRow label="Worst Season PF/G"
+                value={`${rsPts.worst_season_avg.avg_pf} ppg`}
                 sub={String(rsPts.worst_season_avg.year)} accent={RED} last/>
             )}
           </Card>
@@ -380,20 +380,20 @@ function ResultsTab({name}) {
             {view==='era' && (
               <StatRow label="Appearances" value={poRec.appearances||'—'}/>
             )}
-            <StatRow label="Avg PF / Game" value={poPts.avg_pf?.toFixed(1)||'—'}
+            <StatRow label="Average PF/G" value={poPts.avg_pf?.toFixed(1)||'—'}
               sub={poPfRank} accent={GOLD}/>
-            <StatRow label="Avg PA / Game" value={poPts.avg_pa?.toFixed(1)||'—'}/>
-            <StatRow label="Actual vs Proj"
+            <StatRow label="Average PA/G" value={poPts.avg_pa?.toFixed(1)||'—'}/>
+            <StatRow label="Actual PF vs Proj PF"
               value={poPts.actual_vs_proj!=null
                 ?`${poPts.actual_vs_proj>0?'+':''}${poPts.actual_vs_proj.toFixed(2)}`:'—'}
               accent={poPts.actual_vs_proj>=0?GREEN:RED}/>
             {poPts.best_week&&(
               <StatRow label="Best Playoff Week" value={`${poPts.best_week.points} pts`}
-                sub={`${poPts.best_week.year} Wk ${poPts.best_week.week}`} accent={GREEN}/>
+                sub={`${poPts.best_week.year} Week ${poPts.best_week.week}`} accent={GREEN}/>
             )}
             {poPts.worst_week&&(
               <StatRow label="Worst Playoff Week" value={`${poPts.worst_week.points} pts`}
-                sub={`${poPts.worst_week.year} Wk ${poPts.worst_week.week}`} accent={RED} last/>
+                sub={`${poPts.worst_week.year} Week ${poPts.worst_week.week}`} accent={RED} last/>
             )}
           </Card>
 
@@ -407,7 +407,7 @@ function ResultsTab({name}) {
                     <PosChip pos={pos}/>
                     <div style={{flex:1}}>
                       <div style={{fontSize:12,color:TEXT_1,fontWeight:500}}>{data.player_name}</div>
-                      <div style={{fontSize:9,color:TEXT_3}}>{data.year} Wk {data.week}</div>
+                      <div style={{fontSize:9,color:TEXT_3}}>{data.year} Week {data.week}</div>
                     </div>
                     <div style={{fontSize:13,fontWeight:600,color:GREEN}}>{data.points}</div>
                   </div>
@@ -425,7 +425,7 @@ function ResultsTab({name}) {
                     <PosChip pos={pos}/>
                     <div style={{flex:1}}>
                       <div style={{fontSize:12,color:TEXT_1,fontWeight:500}}>{data.player_name}</div>
-                      <div style={{fontSize:9,color:TEXT_3}}>{data.year} Wk {data.week}</div>
+                      <div style={{fontSize:9,color:TEXT_3}}>{data.year} Week {data.week}</div>
                     </div>
                     <div style={{fontSize:13,fontWeight:600,color:RED}}>{data.points}</div>
                   </div>
@@ -678,15 +678,15 @@ function TransactionsTab({name}) {
             <>
               <SectionLabel label="Move Highlights"/>
               <Card>
-                <StatRow label="Avg Moves / Season" value={moves.avg_moves_per_season??'—'}/>
+                <StatRow label="Moves / Season" value={moves.avg_moves_per_season??'—'}/>
                 {moves.best_faab_add&&(
-                  <StatRow label="Best FAAB Add"
+                  <StatRow label="Biggest FAAB Add"
                     value={`$${moves.best_faab_add.bid}`}
                     sub={`${moves.best_faab_add.player_name} (${moves.best_faab_add.position}) · ${moves.best_faab_add.year}`}
                     accent={GOLD}/>
                 )}
                 {moves.avg_faab_remaining!=null&&(
-                  <StatRow label="Avg FAAB Remaining"
+                  <StatRow label="Average Remaining FAAB"
                     value={`$${moves.avg_faab_remaining}`}
                     sub={`${moves.faab_seasons} seasons tracked`}
                     accent={moves.avg_faab_remaining>=0?GREEN:RED}/>
@@ -695,7 +695,7 @@ function TransactionsTab({name}) {
 
               <SectionLabel label="Trade Highlights"/>
               <Card>
-                <StatRow label="Avg Trades / Season" value={trades.avg_trades_per_season??'—'}/>
+                <StatRow label="Trades / Season" value={trades.avg_trades_per_season??'—'}/>
                 {trades.top_trade_partner&&(
                   <StatRow label="Top Trade Partner"
                     value={trades.top_trade_partner.display_name}
@@ -727,10 +727,10 @@ function TransactionsTab({name}) {
                   {(draft.avg_pick_snake||draft.avg_auction_top_cost)&&(
                     <Card>
                       {draft.avg_pick_snake&&(
-                        <StatRow label="Avg Snake Pick" value={`#${draft.avg_pick_snake}`}/>
+                        <StatRow label="Average Snake Draft Position" value={`#${draft.avg_pick_snake}`}/>
                       )}
                       {draft.avg_auction_top_cost&&(
-                        <StatRow label="Avg Auction Top Cost" value={`$${draft.avg_auction_top_cost}`}
+                        <StatRow label="Average Auction Top Player Cost" value={`$${draft.avg_auction_top_cost}`}
                           accent={GOLD} last/>
                       )}
                     </Card>
@@ -903,7 +903,7 @@ function MatchupsTab({name}) {
                                 <div style={{fontSize:12,fontWeight:500,color:TEXT_1}}>{opp.display_name}</div>
                                 {opp.last_matchup&&(
                                   <div style={{fontSize:9,color:TEXT_3,marginTop:1}}>
-                                    Last: {opp.last_matchup.result} · {opp.last_matchup.year} Wk {opp.last_matchup.week}
+                                    Last Matchup: {opp.last_matchup.result} · {opp.last_matchup.year} Week {opp.last_matchup.week}
                                     {` (${opp.last_matchup.my_pts}–${opp.last_matchup.opp_pts})`}
                                   </div>
                                 )}
@@ -927,7 +927,7 @@ function MatchupsTab({name}) {
                                    c:rs.avg_diff>0?GREEN:rs.avg_diff<0?RED:TEXT_2},
                                 ].map(s=>(
                                   <div key={s.l} style={{textAlign:'center'}}>
-                                    <div style={{fontSize:7,color:TEXT_3,marginBottom:1}}>{s.l}</div>
+                                    <div style={{fontSize:8,color:TEXT_3,marginBottom:1}}>{s.l}</div>
                                     <div style={{fontSize:10,color:s.c||TEXT_2,fontWeight:500}}>{s.v||'—'}</div>
                                   </div>
                                 ))}
@@ -976,7 +976,7 @@ function MatchupsTab({name}) {
                         <div style={{display:'flex',alignItems:'center',
                           justifyContent:'space-between',marginBottom:6}}>
                           <span style={{fontSize:9,color:TEXT_3}}>
-                            {wk.is_playoffs?'🏆 Playoffs':'RS'} · Wk {wk.week}
+                            {wk.is_playoffs?'🏆 Playoffs':'RS'} · Week {wk.week}
                           </span>
                           {hasPlayers&&(
                             <span style={{fontSize:10,color:TEXT_3,
