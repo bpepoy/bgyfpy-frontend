@@ -846,17 +846,17 @@ function SeasonTab() {
           </div>
           <div style={{ margin:'0 14px 12px',background:BG_CARD,borderRadius:10,
             border:`0.5px solid ${GOLD_BORDER}`,overflow:'hidden' }}>
-            <div style={{ display:'grid',gridTemplateColumns:'1fr 36px 36px 36px 52px 52px 52px',
+            <div style={{ display:'grid',gridTemplateColumns:'1fr 36px 36px 36px 52px 52px',
               padding:'6px 12px',borderBottom:`0.5px solid ${GOLD_BORDER}`,
               background:'rgba(212,168,67,0.04)' }}>
-              {['Manager','W','L','NL','Win%','SoloH','SoloM'].map((h,i)=>(
+              {['Manager','W','L','NL','Win%','Gage'].map((h,i)=>(
                 <span key={h} style={{ fontSize:8,color:TEXT_3,textAlign:i>0?'center':'left',
                   letterSpacing:'0.06em' }}>{h}</span>
               ))}
             </div>
             {sorted.map((m,i)=>(
               <div key={m.manager_id} style={{ display:'grid',
-                gridTemplateColumns:'1fr 36px 36px 36px 52px 52px 52px',
+                gridTemplateColumns:'1fr 36px 36px 36px 52px 52px',
                 padding:'8px 12px',alignItems:'center',
                 borderBottom:i<sorted.length-1?`0.5px solid rgba(212,168,67,0.06)`:'none' }}>
                 <div style={{ display:'flex',alignItems:'center',gap:7 }}>
@@ -869,7 +869,6 @@ function SeasonTab() {
                 <span style={{ fontSize:12,fontWeight:600,color:GOLD,textAlign:'center' }}>
                   {m.hit_pct!=null?`${m.hit_pct}%`:'—'}
                 </span>
-                <span style={{ fontSize:11,color:TEXT_2,textAlign:'center' }}>{m.solo_hit||0}</span>
                 <span style={{ fontSize:11,color:TEXT_2,textAlign:'center' }}>{m.solo_miss||0}</span>
               </div>
             ))}
@@ -996,16 +995,16 @@ function OverallTab() {
       </div>
       <div style={{ margin:'0 14px 12px',background:BG_CARD,borderRadius:10,
         border:`0.5px solid ${GOLD_BORDER}`,overflow:'hidden' }}>
-        <div style={{ display:'grid',gridTemplateColumns:'1fr 36px 36px 36px 52px 52px 52px 48px',
+        <div style={{ display:'grid',gridTemplateColumns:'1fr 36px 36px 36px 52px 52px 48px',
           padding:'6px 12px',borderBottom:`0.5px solid ${GOLD_BORDER}`,
           background:'rgba(212,168,67,0.04)' }}>
-          {['Manager','W','L','NL','Win%','SoloH','SoloM','Szns'].map((h,i)=>(
+          {['Manager','W','L','NL','Win%','Gage','Szns'].map((h,i)=>(
             <span key={h} style={{ fontSize:8,color:TEXT_3,textAlign:i>0?'center':'left' }}>{h}</span>
           ))}
         </div>
         {parlayStats.map((m,i)=>(
           <div key={m.manager_id} style={{ display:'grid',
-            gridTemplateColumns:'1fr 36px 36px 36px 52px 52px 52px 48px',
+            gridTemplateColumns:'1fr 36px 36px 36px 52px 52px 48px',
             padding:'8px 12px',alignItems:'center',
             borderBottom:i<parlayStats.length-1?`0.5px solid rgba(212,168,67,0.06)`:'none' }}>
             <div style={{ display:'flex',alignItems:'center',gap:6 }}>
@@ -1018,7 +1017,6 @@ function OverallTab() {
             <span style={{ fontSize:11,fontWeight:600,color:GOLD,textAlign:'center' }}>
               {m.hit_pct!=null?`${m.hit_pct}%`:'—'}
             </span>
-            <span style={{ fontSize:10,color:TEXT_2,textAlign:'center' }}>{m.solo_hit||0}</span>
             <span style={{ fontSize:10,color:TEXT_2,textAlign:'center' }}>{m.solo_miss||0}</span>
             <span style={{ fontSize:10,color:TEXT_3,textAlign:'center' }}>{m.seasons||0}</span>
           </div>
@@ -1144,7 +1142,7 @@ function BettingBottomNav({ active, onTab }) {
 }
 
 // ── Main screen ───────────────────────────────────────────────────────────────
-export default function BettingScreen() {
+export default function BettingScreen({ currentUser }) {
   const location = useLocation()
   const navigate = useNavigate()
 
