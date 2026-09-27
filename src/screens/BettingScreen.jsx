@@ -31,7 +31,7 @@ const ACTIVE_MEMBERS = [
 
 const BOTTOM_TABS = [
   { key:'parlays',    label:'Parlays',    icon:'/icons/betting-icon.png',  path:'/betting/parlays'    },
-  { key:'water-bets', label:'Water Bets', icon:'/icons/water-bet-icon.png',  path:'/betting/water-bets' },
+  { key:'water-bets', label:'Water Bets', icon:'/icons/water-bets-icon.png',  path:'/betting/water-bets' },
   { key:'season',     label:'Season',     icon:'/icons/season-icon.png',   path:'/betting/season'     },
   { key:'overall',    label:'Overall',    icon:'/icons/league-icon.png',   path:'/betting/overall'    },
 ]
@@ -241,33 +241,12 @@ function ParlaysTab({ currentUser }) {
         </div>
       )}
 
-      {/* Season bet toggle */}
-      <div style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 14px 0' }}>
-        <button onClick={() => setIsSeasonBet(p=>!p)}
-          style={{ padding:'4px 12px', borderRadius:12, border:'none', cursor:'pointer',
-            background:isSeasonBet?GOLD_DIM:'rgba(255,255,255,0.04)',
-            borderWidth:isSeasonBet?1:0.5, borderStyle:'solid',
-            borderColor:isSeasonBet?GOLD:'rgba(255,255,255,0.1)',
-            fontSize:9, color:isSeasonBet?GOLD:TEXT_3, fontWeight:isSeasonBet?600:400,
-            letterSpacing:'0.08em', textTransform:'uppercase' }}>
-          Season Bet
-        </button>
-      </div>
-
-      {!isSeasonBet && season && week && (
-        <SeasonWeekNav season={season} week={week} seasons={seasons}
-          onChangeSeason={s=>{setSeason(s);setWeek(1)}}
-          onChangeWeek={fn=>setWeek(fn)} maxWeek={maxWeek}/>
-      )}
-      {isSeasonBet && season && (
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'center',
-          padding:'6px 14px 2px' }}>
-          <div style={{ padding:'6px 16px', borderRadius:18, border:`1px solid ${GOLD_BORDER}`,
-            background:GOLD_DIM, fontSize:12, fontWeight:500, color:GOLD }}>
-            {season} Season Bet
-          </div>
-        </div>
-      )}
+      <ParlayNav
+        season={season} week={week} seasons={seasons} isSeasonBet={isSeasonBet}
+        onChangeSeason={s=>{setSeason(s);setWeek(1);setIsSeasonBet(false)}}
+        onChangeWeek={w=>setWeek(w)}
+        onToggleSeasonBet={setIsSeasonBet}
+      />
 
       {loading ? (
         <div style={{ padding:40, textAlign:'center', color:TEXT_3, fontSize:12 }}>Loading…</div>
@@ -794,10 +773,7 @@ function SeasonTab() {
 
   const sorted = [...parlayStats].sort((a,b) => (b.hit_pct||0)-(a.hit_pct||0))
 
-  // Wager/payout totals from weeks
-  const totalWager  = weeks.reduce((s,w) => s + (w.wager  || 0), 0)
-  const totalPayout = weeks.reduce((s,w) => s + (w.payout || 0), 0)
-  const netPL       = totalPayout - totalWager
+  const pay = d?.payment_summary || {}
 
   return (
     <div style={{ flex:1, overflowY:'auto', paddingBottom:16 }}>
@@ -846,37 +822,43 @@ function SeasonTab() {
           </div>
           <div style={{ margin:'0 14px 12px',background:BG_CARD,borderRadius:10,
             border:`0.5px solid ${GOLD_BORDER}`,overflow:'hidden' }}>
-            <div style={{ display:'grid',gridTemplateColumns:'1fr 36px 36px 36px 52px 52px',
+            <div style={{ display:'grid',gridTemplateColumns:'1fr 30px 30px 30px 44px 44px 44px 44px',
               padding:'6px 12px',borderBottom:`0.5px solid ${GOLD_BORDER}`,
               background:'rgba(212,168,67,0.04)' }}>
-              {['Manager','W','L','NL','Win%','Gage'].map((h,i)=>(
+              {['Manager','W','L','NL','Win%','Gage','Wager','Payout'].map((h,i)=>(
                 <span key={h} style={{ fontSize:8,color:TEXT_3,textAlign:i>0?'center':'left',
                   letterSpacing:'0.06em' }}>{h}</span>
               ))}
             </div>
             {sorted.map((m,i)=>(
               <div key={m.manager_id} style={{ display:'grid',
-                gridTemplateColumns:'1fr 36px 36px 36px 52px 52px',
+                gridTemplateColumns:'1fr 30px 30px 30px 44px 44px 44px 44px',
                 padding:'8px 12px',alignItems:'center',
                 borderBottom:i<sorted.length-1?`0.5px solid rgba(212,168,67,0.06)`:'none' }}>
                 <div style={{ display:'flex',alignItems:'center',gap:7 }}>
                   <Avatar managerId={m.manager_id} size={22}/>
-                  <span style={{ fontSize:11,color:TEXT_1,fontWeight:500 }}>{m.display_name}</span>
+                  <span style={{ fontSize:10,color:TEXT_1,fontWeight:500 }}>{m.display_name}</span>
                 </div>
-                <span style={{ fontSize:11,color:GREEN,textAlign:'center' }}>{m.total_hit||0}</span>
-                <span style={{ fontSize:11,color:RED,textAlign:'center' }}>{m.total_miss||0}</span>
-                <span style={{ fontSize:11,color:TEXT_3,textAlign:'center' }}>{m.total_no_leg||0}</span>
-                <span style={{ fontSize:12,fontWeight:600,color:GOLD,textAlign:'center' }}>
+                <span style={{ fontSize:10,color:GREEN,textAlign:'center' }}>{m.total_hit||0}</span>
+                <span style={{ fontSize:10,color:RED,textAlign:'center' }}>{m.total_miss||0}</span>
+                <span style={{ fontSize:10,color:TEXT_3,textAlign:'center' }}>{m.total_no_leg||0}</span>
+                <span style={{ fontSize:11,fontWeight:600,color:GOLD,textAlign:'center' }}>
                   {m.hit_pct!=null?`${m.hit_pct}%`:'—'}
                 </span>
-                <span style={{ fontSize:11,color:TEXT_2,textAlign:'center' }}>{m.solo_miss||0}</span>
+                <span style={{ fontSize:10,color:TEXT_2,textAlign:'center' }}>{m.solo_miss||0}</span>
+                <span style={{ fontSize:10,color:TEXT_2,textAlign:'center' }}>
+                  {m.total_wager>0?`$${m.total_wager}`:'—'}
+                </span>
+                <span style={{ fontSize:10,color:m.total_payout>0?GREEN:TEXT_3,textAlign:'center' }}>
+                  {m.total_payout>0?`$${m.total_payout}`:'—'}
+                </span>
               </div>
             ))}
           </div>
 
-          {/* Hit% bar chart */}
+          {/* Win% bar chart */}
           <div style={{ fontSize:9,color:TEXT_3,letterSpacing:'0.1em',padding:'8px 14px 6px' }}>
-            HIT PERCENTAGE
+            WIN PERCENTAGE
           </div>
           <div style={{ margin:'0 14px 12px',background:BG_CARD,borderRadius:10,
             border:`0.5px solid ${GOLD_BORDER}`,padding:'10px 12px' }}>
@@ -977,39 +959,57 @@ function OverallTab() {
 
   const parlayStats = data.parlay_stats || []
   const wbStats     = data.water_bet_stats || []
-
-  // Top 5 most used players — aggregate from weeks
-  const playerUsage = {}
-  const playerHits  = {}
-  ;(data.player_stats||[]).forEach(p => {
-    playerUsage[p.player_name] = (playerUsage[p.player_name]||0) + 1
-    if (p.result === 'hit') playerHits[p.player_name] = (playerHits[p.player_name]||0) + 1
-  })
-  const top5Used = Object.entries(playerUsage).sort((a,b)=>b[1]-a[1]).slice(0,5)
-  const top5Hits = Object.entries(playerHits).sort((a,b)=>b[1]-a[1]).slice(0,5)
+  const pay         = data.payment_summary || {}
 
   return (
     <div style={{ flex:1,overflowY:'auto',paddingBottom:16 }}>
+
+      {/* Payment Summary */}
+      {pay.total_wager > 0 && (
+        <>
+          <div style={{ fontSize:9,color:TEXT_3,letterSpacing:'0.1em',padding:'12px 14px 4px' }}>
+            ALL-TIME PAYMENT SUMMARY
+          </div>
+          <div style={{ display:'flex', gap:6, padding:'0 14px 8px', flexWrap:'wrap' }}>
+            {[
+              {l:'Total Wager',     v:`$${pay.total_wager}`,            c:TEXT_2},
+              {l:'Potential Payout',v:`$${pay.total_potential_payout}`, c:TEXT_2},
+              {l:'Actual Payout',   v:`$${pay.total_actual_payout}`,    c:GREEN},
+              {l:'Net Winnings',    v:`${pay.total_winnings>=0?'+':''}$${pay.total_winnings}`,
+               c:pay.total_winnings>=0?GREEN:RED},
+            ].map(s=>(
+              <div key={s.l} style={{ flex:'1 1 40%', background:BG_CARD, borderRadius:8,
+                border:`0.5px solid ${GOLD_BORDER}`, padding:'8px 4px', textAlign:'center',
+                marginBottom:2 }}>
+                <div style={{ fontSize:7, color:TEXT_3, marginBottom:2, letterSpacing:'0.06em',
+                  whiteSpace:'nowrap' }}>{s.l}</div>
+                <div style={{ fontSize:14, fontWeight:600, color:s.c }}>{s.v}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
       <div style={{ fontSize:9,color:TEXT_3,letterSpacing:'0.1em',padding:'12px 14px 6px' }}>
         ALL-TIME PARLAY STANDINGS
       </div>
       <div style={{ margin:'0 14px 12px',background:BG_CARD,borderRadius:10,
         border:`0.5px solid ${GOLD_BORDER}`,overflow:'hidden' }}>
-        <div style={{ display:'grid',gridTemplateColumns:'1fr 36px 36px 36px 52px 52px 48px',
+        <div style={{ display:'grid',gridTemplateColumns:'1fr 30px 30px 30px 44px 44px 44px 44px 36px',
           padding:'6px 12px',borderBottom:`0.5px solid ${GOLD_BORDER}`,
           background:'rgba(212,168,67,0.04)' }}>
-          {['Manager','W','L','NL','Win%','Gage','Szns'].map((h,i)=>(
+          {['Manager','W','L','NL','Win%','Gage','Wager','Payout','Szns'].map((h,i)=>(
             <span key={h} style={{ fontSize:8,color:TEXT_3,textAlign:i>0?'center':'left' }}>{h}</span>
           ))}
         </div>
         {parlayStats.map((m,i)=>(
           <div key={m.manager_id} style={{ display:'grid',
-            gridTemplateColumns:'1fr 36px 36px 36px 52px 52px 48px',
+            gridTemplateColumns:'1fr 30px 30px 30px 44px 44px 44px 44px 36px',
             padding:'8px 12px',alignItems:'center',
             borderBottom:i<parlayStats.length-1?`0.5px solid rgba(212,168,67,0.06)`:'none' }}>
             <div style={{ display:'flex',alignItems:'center',gap:6 }}>
               <Avatar managerId={m.manager_id} size={20}/>
-              <span style={{ fontSize:10,color:TEXT_1,fontWeight:500 }}>{m.display_name}</span>
+              <span style={{ fontSize:9,color:TEXT_1,fontWeight:500 }}>{m.display_name}</span>
             </div>
             <span style={{ fontSize:10,color:GREEN,textAlign:'center' }}>{m.total_hit||0}</span>
             <span style={{ fontSize:10,color:RED,textAlign:'center' }}>{m.total_miss||0}</span>
@@ -1018,14 +1018,20 @@ function OverallTab() {
               {m.hit_pct!=null?`${m.hit_pct}%`:'—'}
             </span>
             <span style={{ fontSize:10,color:TEXT_2,textAlign:'center' }}>{m.solo_miss||0}</span>
+            <span style={{ fontSize:10,color:TEXT_2,textAlign:'center' }}>
+              {m.total_wager>0?`$${m.total_wager}`:'—'}
+            </span>
+            <span style={{ fontSize:10,color:m.total_payout>0?GREEN:TEXT_3,textAlign:'center' }}>
+              {m.total_payout>0?`$${m.total_payout}`:'—'}
+            </span>
             <span style={{ fontSize:10,color:TEXT_3,textAlign:'center' }}>{m.seasons||0}</span>
           </div>
         ))}
       </div>
 
-      {/* All-time hit% chart */}
+      {/* Win% bar chart */}
       <div style={{ fontSize:9,color:TEXT_3,letterSpacing:'0.1em',padding:'8px 14px 6px' }}>
-        ALL-TIME HIT PERCENTAGE
+        ALL-TIME WIN PERCENTAGE
       </div>
       <div style={{ margin:'0 14px 12px',background:BG_CARD,borderRadius:10,
         border:`0.5px solid ${GOLD_BORDER}`,padding:'10px 12px' }}>
@@ -1142,7 +1148,7 @@ function BettingBottomNav({ active, onTab }) {
 }
 
 // ── Main screen ───────────────────────────────────────────────────────────────
-export default function BettingScreen({ currentUser }) {
+export default function BettingScreen() {
   const location = useLocation()
   const navigate = useNavigate()
 
