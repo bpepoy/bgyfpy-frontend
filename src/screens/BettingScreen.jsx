@@ -1148,7 +1148,7 @@ function BettingBottomNav({ active, onTab }) {
 }
 
 // ── Main screen ───────────────────────────────────────────────────────────────
-export default function BettingScreen() {
+export default function BettingScreen({ currentUser }) {
   const location = useLocation()
   const navigate = useNavigate()
 
