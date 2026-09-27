@@ -482,8 +482,8 @@ function ParlaysTab({ currentUser }) {
 }
 
 // ── WATER BETS ────────────────────────────────────────────────────────────────
-function WaterBetsTab() {
-  const user      = DEV_USER
+function WaterBetsTab({ currentUser }) {
+  const user      = currentUser
   const canManage = CAN_MANAGE.includes(user.manager_id)
 
   const [season, setSeason]   = useState(2026)
