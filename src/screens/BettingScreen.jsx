@@ -296,83 +296,76 @@ function ParlaysTab({ currentUser }) {
                 </div>
 
                 {!isNoLeg && (
-                      <>
-                        {/* Player + position */}
-                        <div style={{ display:'grid', gridTemplateColumns:'1fr 80px', gap:6, marginBottom:6 }}>
-                          <input value={leg.player_name||''} placeholder="Player name"
-                            onChange={e => updateLeg(m.manager_id,'player_name',e.target.value)}
-                            style={{ padding:'7px 10px', borderRadius:8,
-                              border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
-                              color:TEXT_1, fontSize:12 }}/>
-                          <select value={leg.position||''}
-                            onChange={e => updateLeg(m.manager_id,'position',e.target.value)}
-                            style={{ padding:'7px 8px', borderRadius:8,
-                              border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
-                              color:leg.position?TEXT_1:TEXT_3, fontSize:12, cursor:'pointer' }}>
-                            <option value="">Pos</option>
-                            {(options?.player_positions||[]).map(p => <option key={p}>{p}</option>)}
-                          </select>
-                        </div>
-                        {/* Stat line */}
-                        <div style={{ display:'grid', gridTemplateColumns:'60px 70px 1fr', gap:6, marginBottom:8 }}>
-                          <input type="number" value={leg.stat_count||''} placeholder="Count"
-                            onChange={e => updateLeg(m.manager_id,'stat_count',e.target.value)}
-                            style={{ padding:'7px 8px', borderRadius:8,
-                              border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
-                              color:TEXT_1, fontSize:12 }}/>
-                          <select value={leg.stat_op||''}
-                            onChange={e => updateLeg(m.manager_id,'stat_op',e.target.value)}
-                            style={{ padding:'7px 6px', borderRadius:8,
-                              border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
-                              color:leg.stat_op?TEXT_1:TEXT_3, fontSize:11, cursor:'pointer' }}>
-                            <option value="">Op</option>
-                            {(options?.stat_operations||[]).map(o =>
-                              <option key={o.value} value={o.value}>{o.label}</option>)}
-                          </select>
-                          <select value={leg.stat_type||''}
-                            onChange={e => updateLeg(m.manager_id,'stat_type',e.target.value)}
-                            style={{ padding:'7px 8px', borderRadius:8,
-                              border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
-                              color:leg.stat_type?TEXT_1:TEXT_3, fontSize:11, cursor:'pointer' }}>
-                            <option value="">Stat type</option>
-                            {(options?.stat_types||[]).map(s =>
-                              <option key={s.value} value={s.value}>{s.label}</option>)}
-                          </select>
-                        </div>
-                      </>
-                    )}
+                  <div>
+                    {/* Player + position */}
+                    <div style={{ display:'grid', gridTemplateColumns:'1fr 80px', gap:6, marginBottom:6 }}>
+                      <input value={leg.player_name||''} placeholder="Player name"
+                        onChange={e => updateLeg(m.manager_id,'player_name',e.target.value)}
+                        style={{ padding:'7px 10px', borderRadius:8,
+                          border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
+                          color:TEXT_1, fontSize:12 }}/>
+                      <select value={leg.position||''}
+                        onChange={e => updateLeg(m.manager_id,'position',e.target.value)}
+                        style={{ padding:'7px 8px', borderRadius:8,
+                          border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
+                          color:leg.position?TEXT_1:TEXT_3, fontSize:12, cursor:'pointer' }}>
+                        <option value="">Pos</option>
+                        {(options?.player_positions||[]).map(p => <option key={p}>{p}</option>)}
+                      </select>
+                    </div>
+                    {/* Stat line */}
+                    <div style={{ display:'grid', gridTemplateColumns:'60px 70px 1fr', gap:6, marginBottom:8 }}>
+                      <input type="number" value={leg.stat_count||''} placeholder="Count"
+                        onChange={e => updateLeg(m.manager_id,'stat_count',e.target.value)}
+                        style={{ padding:'7px 8px', borderRadius:8,
+                          border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
+                          color:TEXT_1, fontSize:12 }}/>
+                      <select value={leg.stat_op||''}
+                        onChange={e => updateLeg(m.manager_id,'stat_op',e.target.value)}
+                        style={{ padding:'7px 6px', borderRadius:8,
+                          border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
+                          color:leg.stat_op?TEXT_1:TEXT_3, fontSize:11, cursor:'pointer' }}>
+                        <option value="">Op</option>
+                        {(options?.stat_operations||[]).map(o =>
+                          <option key={o.value} value={o.value}>{o.label}</option>)}
+                      </select>
+                      <select value={leg.stat_type||''}
+                        onChange={e => updateLeg(m.manager_id,'stat_type',e.target.value)}
+                        style={{ padding:'7px 8px', borderRadius:8,
+                          border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
+                          color:leg.stat_type?TEXT_1:TEXT_3, fontSize:11, cursor:'pointer' }}>
+                        <option value="">Stat type</option>
+                        {(options?.stat_types||[]).map(s =>
+                          <option key={s.value} value={s.value}>{s.label}</option>)}
+                      </select>
+                    </div>
                     {/* Result radio */}
-                    {(
-                      <div style={{ display:'flex', gap:6 }}>
-                        {['waiting','hit','miss'].map(r => (
-                          <button key={r} onClick={() => updateLeg(m.manager_id,'result',r)}
-                            style={{ flex:1, padding:'5px', borderRadius:8, border:'none', cursor:'pointer',
-                              background:leg.result===r
-                                ? r==='hit'?'rgba(93,191,106,0.2)':r==='miss'?'rgba(207,95,95,0.2)':GOLD_DIM
-                                : 'rgba(255,255,255,0.04)',
-                              borderWidth:leg.result===r?1:0.5, borderStyle:'solid',
-                              borderColor:leg.result===r
-                                ? r==='hit'?GREEN:r==='miss'?RED:GOLD
-                                : 'rgba(255,255,255,0.06)',
-                              fontSize:9, fontWeight:leg.result===r?600:400,
-                              color:leg.result===r
-                                ? r==='hit'?GREEN:r==='miss'?RED:GOLD
-                                : TEXT_3,
-                              textTransform:'uppercase' }}>
-                            {r==='waiting'?'–':r}
-                          </button>
-                        ))}
-                        <button onClick={() => handleUpdateLeg(m.manager_id)}
-                          style={{ padding:'5px 10px', borderRadius:8, border:'none', cursor:'pointer',
-                            background:GOLD_DIM, borderWidth:1, borderStyle:'solid',
-                            borderColor:GOLD, fontSize:9, color:GOLD }}>Save</button>
-                      </div>
-                    )}
-                  </>
+                    <div style={{ display:'flex', gap:6 }}>
+                      {['waiting','hit','miss'].map(r => (
+                        <button key={r} onClick={() => updateLeg(m.manager_id,'result',r)}
+                          style={{ flex:1, padding:'5px', borderRadius:8, border:'none', cursor:'pointer',
+                            background:leg.result===r
+                              ? r==='hit'?'rgba(93,191,106,0.2)':r==='miss'?'rgba(207,95,95,0.2)':GOLD_DIM
+                              : 'rgba(255,255,255,0.04)',
+                            borderWidth:leg.result===r?1:0.5, borderStyle:'solid',
+                            borderColor:leg.result===r
+                              ? r==='hit'?GREEN:r==='miss'?RED:GOLD
+                              : 'rgba(255,255,255,0.06)',
+                            fontSize:9, fontWeight:leg.result===r?600:400,
+                            color:leg.result===r
+                              ? r==='hit'?GREEN:r==='miss'?RED:GOLD
+                              : TEXT_3,
+                            textTransform:'uppercase' }}>
+                          {r==='waiting'?'Pending':r}
+                        </button>
+                      ))}
+                      <button onClick={() => handleUpdateLeg(m.manager_id)}
+                        style={{ padding:'5px 10px', borderRadius:8, border:'none', cursor:'pointer',
+                          background:GOLD_DIM, borderWidth:1, borderStyle:'solid',
+                          borderColor:GOLD, fontSize:9, color:GOLD }}>Save</button>
+                    </div>
+                  </div>
                 )}
-              </div>
-            )
-          })}
 
           {saveStatus && (
             <div style={{ padding:'10px 14px', borderRadius:10, marginBottom:12,
