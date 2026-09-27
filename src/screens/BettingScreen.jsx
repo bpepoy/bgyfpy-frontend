@@ -1169,9 +1169,9 @@ export default function BettingScreen() {
     <div style={{ flex:1,display:'flex',flexDirection:'column',overflow:'hidden' }}>
       <div style={{ flex:1,overflowY:'auto',display:'flex',flexDirection:'column' }}>
         {activeTab === 'parlays'    && <ParlaysTab currentUser={currentUser}/>}
-        {activeTab === 'water-bets' && <WaterBetsTab/>}
-        {activeTab === 'season'     && <SeasonTab/>}
-        {activeTab === 'overall'    && <OverallTab/>}
+        {activeTab === 'water-bets' && <WaterBetsTab currentUser={currentUser}/>}
+        {activeTab === 'season'     && <SeasonTab currentUser={currentUser}/>}
+        {activeTab === 'overall'    && <OverallTab currentUser={currentUser}/>}
       </div>
       <BettingBottomNav active={activeTab} onTab={handleTab}/>
     </div>
