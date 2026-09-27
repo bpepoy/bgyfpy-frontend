@@ -369,7 +369,7 @@ function ParlaysTab({ currentUser }) {
               </div>
             )
           })}
-          
+
           {saveStatus && (
             <div style={{ padding:'10px 14px', borderRadius:10, marginBottom:12,
               background:saveStatus.type==='success'?'rgba(93,191,106,0.1)':'rgba(207,95,95,0.1)',
@@ -775,21 +775,30 @@ function SeasonTab() {
         <div style={{ padding:40,textAlign:'center',color:TEXT_3,fontSize:12 }}>Loading…</div>
       ) : !d ? null : (
         <>
-          {/* Wager / Payout / P&L */}
-          {totalWager > 0 && (
-            <div style={{ display:'flex', gap:8, padding:'8px 14px 4px' }}>
-              {[
-                {l:'Total Wager', v:`$${totalWager.toFixed(0)}`, c:TEXT_2},
-                {l:'Total Payout',v:`$${totalPayout.toFixed(0)}`,c:GREEN},
-                {l:'Net P&L',     v:`${netPL>=0?'+':''}$${netPL.toFixed(0)}`,c:netPL>=0?GREEN:RED},
-              ].map(s=>(
-                <div key={s.l} style={{ flex:1, background:BG_CARD, borderRadius:8,
-                  border:`0.5px solid ${GOLD_BORDER}`, padding:'8px 4px', textAlign:'center' }}>
-                  <div style={{ fontSize:7, color:TEXT_3, marginBottom:2, letterSpacing:'0.06em' }}>{s.l}</div>
-                  <div style={{ fontSize:14, fontWeight:600, color:s.c }}>{s.v}</div>
-                </div>
-              ))}
-            </div>
+          {/* Payment Summary */}
+          {pay.total_wager > 0 && (
+            <>
+              <div style={{ fontSize:9,color:TEXT_3,letterSpacing:'0.1em',padding:'12px 14px 4px' }}>
+                PAYMENT SUMMARY
+              </div>
+              <div style={{ display:'flex', gap:6, padding:'0 14px 8px', flexWrap:'wrap' }}>
+                {[
+                  {l:'Total Wager',     v:`$${pay.total_wager}`,             c:TEXT_2},
+                  {l:'Potential Payout',v:`$${pay.total_potential_payout}`,  c:TEXT_2},
+                  {l:'Actual Payout',   v:`$${pay.total_actual_payout}`,     c:GREEN},
+                  {l:'Net Winnings',    v:`${pay.total_winnings>=0?'+':''}$${pay.total_winnings}`,
+                   c:pay.total_winnings>=0?GREEN:RED},
+                ].map(s=>(
+                  <div key={s.l} style={{ flex:'1 1 40%', background:BG_CARD, borderRadius:8,
+                    border:`0.5px solid ${GOLD_BORDER}`, padding:'8px 4px', textAlign:'center',
+                    marginBottom:2 }}>
+                    <div style={{ fontSize:7, color:TEXT_3, marginBottom:2, letterSpacing:'0.06em',
+                      whiteSpace:'nowrap' }}>{s.l}</div>
+                    <div style={{ fontSize:14, fontWeight:600, color:s.c }}>{s.v}</div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
 
           {/* Parlay table */}
