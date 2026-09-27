@@ -366,7 +366,10 @@ function ParlaysTab({ currentUser }) {
                     </div>
                   </div>
                 )}
-
+              </div>
+            )
+          })}
+          
           {saveStatus && (
             <div style={{ padding:'10px 14px', borderRadius:10, marginBottom:12,
               background:saveStatus.type==='success'?'rgba(93,191,106,0.1)':'rgba(207,95,95,0.1)',
