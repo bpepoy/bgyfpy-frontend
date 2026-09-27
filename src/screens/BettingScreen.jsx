@@ -1,7 +1,6 @@
 // src/screens/BettingScreen.jsx
 import { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import Avatar from '../components/Avatar'
 
 const API         = 'https://bgyfpy-backend.onrender.com'
 const GOLD        = '#D4A843'
@@ -15,6 +14,7 @@ const TEXT_3      = '#967843'
 const GREEN       = '#5DBF6A'
 const RED         = '#CF5F5F'
 
+const DEV_USER    = { manager_id:'brian', display_name:'Brian', role:'app_owner' }
 const CAN_MANAGE  = ['brian','frank','zef']
 const ACTIVE_MEMBERS = [
   { manager_id:'blake',  display_name:'Blake'  },
@@ -30,11 +30,22 @@ const ACTIVE_MEMBERS = [
 ]
 
 const BOTTOM_TABS = [
-  { key:'parlays',    label:'Parlays',    icon:'/icons/parlays-icon.png',  path:'/betting/parlays'    },
-  { key:'water-bets', label:'Water Bets', icon:'/icons/water-bets-icon.png',  path:'/betting/water-bets' },
+  { key:'parlays',    label:'Parlays',    icon:'/icons/betting-icon.png',  path:'/betting/parlays'    },
+  { key:'water-bets', label:'Water Bets', icon:'/icons/betting-icon.png',  path:'/betting/water-bets' },
   { key:'season',     label:'Season',     icon:'/icons/season-icon.png',   path:'/betting/season'     },
   { key:'overall',    label:'Overall',    icon:'/icons/league-icon.png',   path:'/betting/overall'    },
 ]
+
+// ── Shared helpers ────────────────────────────────────────────────────────────
+function Avatar({ managerId, size=28 }) {
+  const INITIALS = { blake:'BJ',brian:'BP',frank:'FL',jake:'JK',joey:'JY',jordan:'JM',kyle:'KB',nick:'ND',rob:'RD',zef:'ZD' }
+  const ini = INITIALS[managerId] || managerId?.slice(0,2).toUpperCase() || '?'
+  return (
+    <div style={{ width:size, height:size, borderRadius:'50%', border:`1.5px solid ${GOLD_BORDER}`,
+      flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center',
+      background:GOLD_DIM, fontSize:size*0.3, fontWeight:500, color:GOLD }}>{ini}</div>
+  )
+}
 
 function SeasonWeekNav({ season, week, seasons, onChangeSeason, onChangeWeek, maxWeek }) {
   const [showPicker, setShowPicker] = useState(false)
@@ -92,59 +103,62 @@ function ResultBadge({ result, size='normal' }) {
 
 // ── PARLAYS ───────────────────────────────────────────────────────────────────
 function ParlaysTab({ currentUser }) {
-  const user = currentUser
-  const canManage   = CAN_MANAGE.includes(user.manager_id)
-  const [view, setView]         = useState(canManage ? 'view' : 'view')
-  const [season, setSeason]     = useState(null)
-  const [week, setWeek]         = useState(null)
-  const [parlay, setParlay]     = useState(null)
-  const [options, setOptions]   = useState(null)
-  const [loading, setLoading]   = useState(false)
+  const user        = currentUser
+  const canManage   = CAN_MANAGE.includes(user?.manager_id)
+  const [view, setView]           = useState('view')
+  const [season, setSeason]       = useState(null)
+  const [week, setWeek]           = useState(null)
+  const [isSeasonBet, setIsSeasonBet] = useState(false)
+  const [parlay, setParlay]       = useState(null)
+  const [options, setOptions]     = useState(null)
+  const [loading, setLoading]     = useState(false)
   const [availableWeeks, setAvailableWeeks] = useState([])
-  const [seasons, setSeasons]   = useState([2026])
-
-  // Auto-detect current season and week on mount
-  useEffect(() => {
-    fetch(`${API}/betting/parlays`)
-      .then(r => r.json())
-      .then(d => {
-        if (d.season) setSeason(d.season)
-        if (d.week)   setWeek(d.week)
-      })
-      .catch(() => {
-        setSeason(2026)
-        setWeek(1)
-      })
-  }, [])
-
-  // Manage parlay state
-  const [legs, setLegs]         = useState({})
-  const [saving, setSaving]     = useState(false)
+  const [seasons, setSeasons]     = useState([])
+  const [wager, setWager]         = useState('')
+  const [payout, setPayout]       = useState('')
+  const [legs, setLegs]           = useState({})
+  const [saving, setSaving]       = useState(false)
   const [saveStatus, setSaveStatus] = useState(null)
 
   useEffect(() => {
-  if (!season || !week) return
-  setLoading(true)
-  fetch(`${API}/betting/parlays?season=${season}&week=${week}`)
-    .then(r=>r.json())
-    .then(d => {
-      setParlay(d)
-      setAvailableWeeks(d.available_weeks||[])
-      const allSeasons = [...new Set((d.available_weeks||[]).map(w=>w.season))].sort((a,b)=>b-a)
-      if (allSeasons.length) setSeasons(allSeasons)
-      const legMap = {}
-      ;(d.parlay?.legs||[]).forEach(l => { legMap[l.manager_id] = {...l} })
-      setLegs(legMap)
-      setLoading(false)
-    }).catch(() => setLoading(false))
-  }, [season, week])
+    fetch(`${API}/betting/parlay-options`)
+      .then(r=>r.json()).then(setOptions).catch(()=>{})
+  }, [])
+
+  // Auto-detect current season/week on mount
+  useEffect(() => {
+    fetch(`${API}/betting/parlays`)
+      .then(r=>r.json())
+      .then(d => {
+        if (d.season) setSeason(d.season)
+        if (d.week)   setWeek(d.week)
+        setAvailableWeeks(d.available_weeks||[])
+        const allSeasons = [...new Set((d.available_weeks||[]).map(w=>w.season))].sort((a,b)=>b-a)
+        if (allSeasons.length) setSeasons(allSeasons)
+      }).catch(() => { setSeason(2026); setWeek(1) })
+  }, [])
 
   useEffect(() => {
-  fetch(`${API}/betting/parlay-options`)
-    .then(r => r.json())
-    .then(d => setOptions(d))
-    .catch(() => {})
-  }, [])
+    if (!season || !week) return
+    setLoading(true)
+    const url = isSeasonBet
+      ? `${API}/betting/parlays?season=${season}&week=0&is_season_bet=true`
+      : `${API}/betting/parlays?season=${season}&week=${week}`
+    fetch(url)
+      .then(r=>r.json())
+      .then(d => {
+        setParlay(d)
+        setAvailableWeeks(d.available_weeks||[])
+        const allSeasons = [...new Set((d.available_weeks||[]).map(w=>w.season))].sort((a,b)=>b-a)
+        if (allSeasons.length) setSeasons(allSeasons)
+        setWager(d.parlay?.wager ?? '')
+        setPayout(d.parlay?.payout ?? '')
+        const legMap = {}
+        ;(d.parlay?.legs||[]).forEach(l => { legMap[l.manager_id] = {...l} })
+        setLegs(legMap)
+        setLoading(false)
+      }).catch(() => setLoading(false))
+  }, [season, week, isSeasonBet])
 
   const updateLeg = (managerId, field, value) => {
     setLegs(prev => ({ ...prev, [managerId]: { ...prev[managerId], [field]:value } }))
@@ -153,23 +167,37 @@ function ParlaysTab({ currentUser }) {
   const handleSubmitParlay = async () => {
     setSaving(true); setSaveStatus(null)
     try {
-      const legArr = ACTIVE_MEMBERS.map(m => ({
-        manager_id:  m.manager_id,
-        player_name: legs[m.manager_id]?.player_name || null,
-        player_pos:  legs[m.manager_id]?.player_pos  || null,
-        stat_count:  legs[m.manager_id]?.stat_count  ? parseFloat(legs[m.manager_id].stat_count) : null,
-        stat_op:     legs[m.manager_id]?.stat_op     || null,
-        stat_type:   legs[m.manager_id]?.stat_type   || null,
-      }))
       const noLeg = ACTIVE_MEMBERS
         .filter(m => legs[m.manager_id]?.result === 'no_leg')
         .map(m => m.manager_id)
+      const legArr = isSeasonBet
+        ? ACTIVE_MEMBERS.map(m => ({
+            manager_id: m.manager_id,
+            bet_text:   legs[m.manager_id]?.bet_text || null,
+          }))
+        : ACTIVE_MEMBERS.map(m => ({
+            manager_id:  m.manager_id,
+            player_name: legs[m.manager_id]?.player_name || null,
+            player_pos:  legs[m.manager_id]?.position    || null,
+            stat_count:  legs[m.manager_id]?.stat_count  ? parseFloat(legs[m.manager_id].stat_count) : null,
+            stat_op:     legs[m.manager_id]?.stat_op     || null,
+            stat_type:   legs[m.manager_id]?.stat_type   || null,
+            bet_text:    legs[m.manager_id]?.bet_text    || null,
+          }))
       await fetch(`${API}/betting/parlays/submit`, {
         method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ season, week, entered_by:user.manager_id,
-          no_leg_managers:noLeg, legs:legArr.filter(l=>!noLeg.includes(l.manager_id)) })
+        body: JSON.stringify({
+          season,
+          week:          isSeasonBet ? 0 : week,
+          is_season_bet: isSeasonBet,
+          entered_by:    user?.manager_id,
+          wager:         wager ? parseFloat(wager) : null,
+          payout:        payout ? parseFloat(payout) : null,
+          no_leg_managers: noLeg,
+          legs:          legArr.filter(l=>!noLeg.includes(l.manager_id)),
+        })
       })
-      setSaveStatus({type:'success', msg:'Parlay submitted!'})
+      setSaveStatus({type:'success', msg:isSeasonBet?'Season bet saved!':'Parlay submitted!'})
     } catch(e) { setSaveStatus({type:'error', msg:'Failed to submit.'}) }
     finally { setSaving(false) }
   }
@@ -213,19 +241,57 @@ function ParlaysTab({ currentUser }) {
         </div>
       )}
 
-      <SeasonWeekNav season={season} week={week} seasons={seasons}
-        onChangeSeason={s=>{setSeason(s);setWeek(1)}}
-        onChangeWeek={fn=>setWeek(fn)} maxWeek={maxWeek}/>
+      {/* Season bet toggle */}
+      <div style={{ display:'flex', alignItems:'center', gap:8, padding:'6px 14px 0' }}>
+        <button onClick={() => setIsSeasonBet(p=>!p)}
+          style={{ padding:'4px 12px', borderRadius:12, border:'none', cursor:'pointer',
+            background:isSeasonBet?GOLD_DIM:'rgba(255,255,255,0.04)',
+            borderWidth:isSeasonBet?1:0.5, borderStyle:'solid',
+            borderColor:isSeasonBet?GOLD:'rgba(255,255,255,0.1)',
+            fontSize:9, color:isSeasonBet?GOLD:TEXT_3, fontWeight:isSeasonBet?600:400,
+            letterSpacing:'0.08em', textTransform:'uppercase' }}>
+          Season Bet
+        </button>
+      </div>
+
+      {!isSeasonBet && season && week && (
+        <SeasonWeekNav season={season} week={week} seasons={seasons}
+          onChangeSeason={s=>{setSeason(s);setWeek(1)}}
+          onChangeWeek={fn=>setWeek(fn)} maxWeek={maxWeek}/>
+      )}
+      {isSeasonBet && season && (
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'center',
+          padding:'6px 14px 2px' }}>
+          <div style={{ padding:'6px 16px', borderRadius:18, border:`1px solid ${GOLD_BORDER}`,
+            background:GOLD_DIM, fontSize:12, fontWeight:500, color:GOLD }}>
+            {season} Season Bet
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div style={{ padding:40, textAlign:'center', color:TEXT_3, fontSize:12 }}>Loading…</div>
       ) : view === 'manage' && canManage ? (
         // ── MANAGE VIEW ────────────────────────────────────────────────────────
         <div style={{ padding:'0 14px 24px' }}>
+          {/* Wager / Payout */}
+          <div style={{ display:'flex', gap:8, marginBottom:12 }}>
+            {[{l:'Wager $', v:wager, fn:setWager},{l:'Payout $', v:payout, fn:setPayout}].map(f=>(
+              <div key={f.l} style={{ flex:1 }}>
+                <div style={{ fontSize:8, color:TEXT_3, marginBottom:4, letterSpacing:'0.06em' }}>{f.l}</div>
+                <input type="number" value={f.v} onChange={e=>f.fn(e.target.value)}
+                  placeholder="0"
+                  style={{ width:'100%', padding:'8px 10px', borderRadius:8, boxSizing:'border-box',
+                    border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
+                    color:GOLD, fontSize:13, fontWeight:500 }}/>
+              </div>
+            ))}
+          </div>
+
           {wkResult && (
             <div style={{ display:'flex', gap:8, marginBottom:12 }}>
               {[{l:'Hit',v:wkResult.total_hit,c:GREEN},{l:'Miss',v:wkResult.total_miss,c:RED},
-                {l:'No Leg',v:wkResult.total_no_leg,c:TEXT_3},{l:'Waiting',v:wkResult.total_waiting,c:TEXT_2}
+                {l:'No Leg',v:wkResult.total_no_leg,c:TEXT_3},{l:'Waiting',v:wkResult.total_waiting+(wkResult.total_null||0),c:TEXT_2}
               ].map(s => (
                 <div key={s.l} style={{ flex:1, background:BG_CARD, borderRadius:8,
                   border:`0.5px solid ${GOLD_BORDER}`, padding:'8px 4px', textAlign:'center' }}>
@@ -259,50 +325,63 @@ function ParlaysTab({ currentUser }) {
 
                 {!isNoLeg && (
                   <>
-                    {/* Player + position */}
-                    <div style={{ display:'grid', gridTemplateColumns:'1fr 80px', gap:6, marginBottom:6 }}>
-                      <input value={leg.player_name||''} placeholder="Player name"
-                        onChange={e => updateLeg(m.manager_id,'player_name',e.target.value)}
-                        style={{ padding:'7px 10px', borderRadius:8,
+                    {isSeasonBet ? (
+                      /* Season bet — just a text field */
+                      <textarea value={leg.bet_text||''} placeholder="Season-long bet description…"
+                        onChange={e => updateLeg(m.manager_id,'bet_text',e.target.value)}
+                        rows={2}
+                        style={{ width:'100%', padding:'7px 10px', borderRadius:8, boxSizing:'border-box',
                           border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
-                          color:TEXT_1, fontSize:12 }}/>
-                      <select value={leg.player_pos||''}
-                        onChange={e => updateLeg(m.manager_id,'player_pos',e.target.value)}
-                        style={{ padding:'7px 8px', borderRadius:8,
-                          border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
-                          color:leg.player_pos?TEXT_1:TEXT_3, fontSize:12, cursor:'pointer' }}>
-                        <option value="">Pos</option>
-                        {(options?.player_positions||[]).map(p => <option key={p}>{p}</option>)}
-                      </select>
-                    </div>
-                    {/* Stat line */}
-                    <div style={{ display:'grid', gridTemplateColumns:'60px 70px 1fr', gap:6, marginBottom:8 }}>
-                      <input type="number" value={leg.stat_count||''} placeholder="Count"
-                        onChange={e => updateLeg(m.manager_id,'stat_count',e.target.value)}
-                        style={{ padding:'7px 8px', borderRadius:8,
-                          border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
-                          color:TEXT_1, fontSize:12 }}/>
-                      <select value={leg.stat_op||''}
-                        onChange={e => updateLeg(m.manager_id,'stat_op',e.target.value)}
-                        style={{ padding:'7px 6px', borderRadius:8,
-                          border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
-                          color:leg.stat_op?TEXT_1:TEXT_3, fontSize:11, cursor:'pointer' }}>
-                        <option value="">O/U</option>
-                        {(options?.stat_operations||[]).map(o =>
-                          <option key={o.value} value={o.value}>{o.label}</option>)}
-                      </select>
-                      <select value={leg.stat_type||''}
-                        onChange={e => updateLeg(m.manager_id,'stat_type',e.target.value)}
-                        style={{ padding:'7px 8px', borderRadius:8,
-                          border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
-                          color:leg.stat_type?TEXT_1:TEXT_3, fontSize:11, cursor:'pointer' }}>
-                        <option value="">Stat type</option>
-                        {(options?.stat_types||[]).map(s =>
-                          <option key={s.value} value={s.value}>{s.label}</option>)}
-                      </select>
-                    </div>
+                          color:TEXT_1, fontSize:12, resize:'none', fontFamily:'inherit',
+                          marginBottom:8 }}/>
+                    ) : (
+                      <>
+                        {/* Player + position */}
+                        <div style={{ display:'grid', gridTemplateColumns:'1fr 80px', gap:6, marginBottom:6 }}>
+                          <input value={leg.player_name||''} placeholder="Player name"
+                            onChange={e => updateLeg(m.manager_id,'player_name',e.target.value)}
+                            style={{ padding:'7px 10px', borderRadius:8,
+                              border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
+                              color:TEXT_1, fontSize:12 }}/>
+                          <select value={leg.position||''}
+                            onChange={e => updateLeg(m.manager_id,'position',e.target.value)}
+                            style={{ padding:'7px 8px', borderRadius:8,
+                              border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
+                              color:leg.position?TEXT_1:TEXT_3, fontSize:12, cursor:'pointer' }}>
+                            <option value="">Pos</option>
+                            {(options?.player_positions||[]).map(p => <option key={p}>{p}</option>)}
+                          </select>
+                        </div>
+                        {/* Stat line */}
+                        <div style={{ display:'grid', gridTemplateColumns:'60px 70px 1fr', gap:6, marginBottom:8 }}>
+                          <input type="number" value={leg.stat_count||''} placeholder="Count"
+                            onChange={e => updateLeg(m.manager_id,'stat_count',e.target.value)}
+                            style={{ padding:'7px 8px', borderRadius:8,
+                              border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
+                              color:TEXT_1, fontSize:12 }}/>
+                          <select value={leg.stat_op||''}
+                            onChange={e => updateLeg(m.manager_id,'stat_op',e.target.value)}
+                            style={{ padding:'7px 6px', borderRadius:8,
+                              border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
+                              color:leg.stat_op?TEXT_1:TEXT_3, fontSize:11, cursor:'pointer' }}>
+                            <option value="">Op</option>
+                            {(options?.stat_operations||[]).map(o =>
+                              <option key={o.value} value={o.value}>{o.label}</option>)}
+                          </select>
+                          <select value={leg.stat_type||''}
+                            onChange={e => updateLeg(m.manager_id,'stat_type',e.target.value)}
+                            style={{ padding:'7px 8px', borderRadius:8,
+                              border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
+                              color:leg.stat_type?TEXT_1:TEXT_3, fontSize:11, cursor:'pointer' }}>
+                            <option value="">Stat type</option>
+                            {(options?.stat_types||[]).map(s =>
+                              <option key={s.value} value={s.value}>{s.label}</option>)}
+                          </select>
+                        </div>
+                      </>
+                    )}
                     {/* Result radio */}
-                    {parlayExists && (
+                    {(
                       <div style={{ display:'flex', gap:6 }}>
                         {['waiting','hit','miss'].map(r => (
                           <button key={r} onClick={() => updateLeg(m.manager_id,'result',r)}
@@ -343,28 +422,43 @@ function ParlaysTab({ currentUser }) {
             </div>
           )}
 
-          {!parlayExists && (
-            <button onClick={handleSubmitParlay} disabled={saving}
-              style={{ width:'100%', padding:'13px', borderRadius:12, border:'none', cursor:'pointer',
-                background:GOLD_DIM, borderWidth:1, borderStyle:'solid', borderColor:GOLD,
-                fontSize:13, fontWeight:600, color:GOLD, marginTop:8 }}>
-              {saving ? 'Submitting…' : 'Submit Parlay'}
-            </button>
-          )}
+          <button onClick={handleSubmitParlay} disabled={saving}
+            style={{ width:'100%', padding:'13px', borderRadius:12, border:'none', cursor:'pointer',
+              background:GOLD_DIM, borderWidth:1, borderStyle:'solid', borderColor:GOLD,
+              fontSize:13, fontWeight:600, color:GOLD, marginTop:8 }}>
+            {saving ? 'Saving…' : isSeasonBet ? 'Save Season Bet' : 'Save Parlay'}
+          </button>
         </div>
       ) : (
         // ── VIEW MODE ──────────────────────────────────────────────────────────
         <div style={{ padding:'0 14px 24px' }}>
-          {!parlayExists ? (
+          {/* Wager / payout display */}
+          {(parlay?.parlay?.wager || parlay?.parlay?.payout) && (
+            <div style={{ display:'flex', gap:8, marginBottom:12 }}>
+              {[{l:'Wager',v:parlay?.parlay?.wager,c:TEXT_2},
+                {l:'Payout',v:parlay?.parlay?.payout,c:GREEN}].map(s=>(
+                <div key={s.l} style={{ flex:1, background:BG_CARD, borderRadius:8,
+                  border:`0.5px solid ${GOLD_BORDER}`, padding:'8px 4px', textAlign:'center' }}>
+                  <div style={{ fontSize:8, color:TEXT_3, marginBottom:2 }}>{s.l}</div>
+                  <div style={{ fontSize:15, fontWeight:600, color:s.c }}>
+                    {s.v != null ? `$${s.v}` : '—'}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {!parlay?.parlay?.is_entered ? (
             <div style={{ padding:40, textAlign:'center', color:TEXT_3, fontSize:12 }}>
-              No parlay entered for Week {week} · {season}.
+              {isSeasonBet ? 'No season bet entered yet.' : `No parlay entered for Week ${week} · ${season}.`}
             </div>
           ) : (
             <>
-              {wkResult && (
+              {!isSeasonBet && wkResult && (
                 <div style={{ display:'flex', gap:8, marginBottom:12 }}>
                   {[{l:'Hit',v:wkResult.total_hit,c:GREEN},{l:'Miss',v:wkResult.total_miss,c:RED},
-                    {l:'No Leg',v:wkResult.total_no_leg,c:TEXT_3},{l:'Waiting',v:wkResult.total_waiting,c:TEXT_2}
+                    {l:'No Leg',v:wkResult.total_no_leg,c:TEXT_3},
+                    {l:'Waiting',v:(wkResult.total_waiting||0)+(wkResult.total_null||0),c:TEXT_2}
                   ].map(s => (
                     <div key={s.l} style={{ flex:1, background:BG_CARD, borderRadius:8,
                       border:`0.5px solid ${GOLD_BORDER}`, padding:'8px 4px', textAlign:'center' }}>
@@ -383,14 +477,19 @@ function ParlaysTab({ currentUser }) {
                     <div style={{ fontSize:13, fontWeight:500, color:TEXT_1, marginBottom:2 }}>
                       {leg.display_name}
                     </div>
-                    {leg.result !== 'no_leg' && leg.player_name ? (
+                    {leg.result !== 'no_leg' && (
                       <div style={{ fontSize:11, color:TEXT_2 }}>
-                        {leg.player_name}
-                        {leg.player_pos && ` (${leg.player_pos})`}
-                        {leg.stat_count && leg.stat_op && leg.stat_type &&
-                          ` · ${leg.stat_count} ${leg.stat_op} ${leg.stat_type.replace(/_/g,' ')}`}
+                        {isSeasonBet
+                          ? leg.bet_text || '—'
+                          : leg.player_name
+                            ? `${leg.player_name}${leg.position?` (${leg.position})`:''}`
+                              + (leg.stat_count && leg.stat_op && leg.stat_type
+                                ? ` · ${leg.stat_count} ${leg.stat_op} ${leg.stat_type.replace(/_/g,' ')}`
+                                : '')
+                            : leg.bet_text || '—'
+                        }
                       </div>
-                    ) : null}
+                    )}
                   </div>
                   <ResultBadge result={leg.result}/>
                 </div>
@@ -404,8 +503,8 @@ function ParlaysTab({ currentUser }) {
 }
 
 // ── WATER BETS ────────────────────────────────────────────────────────────────
-function WaterBetsTab({ currentUser }) {
-  const user      = currentUser
+function WaterBetsTab() {
+  const user      = DEV_USER
   const canManage = CAN_MANAGE.includes(user.manager_id)
 
   const [season, setSeason]   = useState(2026)
@@ -691,8 +790,14 @@ function SeasonTab() {
   const d = data[season]
   const parlayStats = d?.parlay_stats || []
   const wbStats     = d?.water_bet_stats || []
+  const weeks       = d?.weeks || []
 
   const sorted = [...parlayStats].sort((a,b) => (b.hit_pct||0)-(a.hit_pct||0))
+
+  // Wager/payout totals from weeks
+  const totalWager  = weeks.reduce((s,w) => s + (w.wager  || 0), 0)
+  const totalPayout = weeks.reduce((s,w) => s + (w.payout || 0), 0)
+  const netPL       = totalPayout - totalWager
 
   return (
     <div style={{ flex:1, overflowY:'auto', paddingBottom:16 }}>
@@ -718,6 +823,23 @@ function SeasonTab() {
         <div style={{ padding:40,textAlign:'center',color:TEXT_3,fontSize:12 }}>Loading…</div>
       ) : !d ? null : (
         <>
+          {/* Wager / Payout / P&L */}
+          {totalWager > 0 && (
+            <div style={{ display:'flex', gap:8, padding:'8px 14px 4px' }}>
+              {[
+                {l:'Total Wager', v:`$${totalWager.toFixed(0)}`, c:TEXT_2},
+                {l:'Total Payout',v:`$${totalPayout.toFixed(0)}`,c:GREEN},
+                {l:'Net P&L',     v:`${netPL>=0?'+':''}$${netPL.toFixed(0)}`,c:netPL>=0?GREEN:RED},
+              ].map(s=>(
+                <div key={s.l} style={{ flex:1, background:BG_CARD, borderRadius:8,
+                  border:`0.5px solid ${GOLD_BORDER}`, padding:'8px 4px', textAlign:'center' }}>
+                  <div style={{ fontSize:7, color:TEXT_3, marginBottom:2, letterSpacing:'0.06em' }}>{s.l}</div>
+                  <div style={{ fontSize:14, fontWeight:600, color:s.c }}>{s.v}</div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Parlay table */}
           <div style={{ fontSize:9,color:TEXT_3,letterSpacing:'0.1em',padding:'12px 14px 6px' }}>
             PARLAY STANDINGS
@@ -1022,7 +1144,7 @@ function BettingBottomNav({ active, onTab }) {
 }
 
 // ── Main screen ───────────────────────────────────────────────────────────────
-export default function BettingScreen({ currentUser }) {
+export default function BettingScreen() {
   const location = useLocation()
   const navigate = useNavigate()
 
@@ -1042,10 +1164,10 @@ export default function BettingScreen({ currentUser }) {
   return (
     <div style={{ flex:1,display:'flex',flexDirection:'column',overflow:'hidden' }}>
       <div style={{ flex:1,overflowY:'auto',display:'flex',flexDirection:'column' }}>
-        {activeTab === 'parlays'    && <ParlaysTab    currentUser={currentUser}/>}
-        {activeTab === 'water-bets' && <WaterBetsTab  currentUser={currentUser}/>}
-        {activeTab === 'season'     && <SeasonTab     currentUser={currentUser}/>}
-        {activeTab === 'overall'    && <OverallTab    currentUser={currentUser}/>}
+        {activeTab === 'parlays'    && <ParlaysTab currentUser={currentUser}/>}
+        {activeTab === 'water-bets' && <WaterBetsTab/>}
+        {activeTab === 'season'     && <SeasonTab/>}
+        {activeTab === 'overall'    && <OverallTab/>}
       </div>
       <BettingBottomNav active={activeTab} onTab={handleTab}/>
     </div>
