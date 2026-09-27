@@ -83,7 +83,7 @@ function ResultBadge({ result, size='normal' }) {
     hit:     { label:'HIT',     bg:'rgba(93,191,106,0.15)',  border:'rgba(93,191,106,0.4)',  color:GREEN },
     miss:    { label:'MISS',    bg:'rgba(207,95,95,0.15)',   border:'rgba(207,95,95,0.4)',   color:RED   },
     no_leg:  { label:'NO LEG', bg:'rgba(255,255,255,0.06)', border:'rgba(255,255,255,0.12)',color:TEXT_3 },
-    waiting: { label:'–',       bg:'rgba(212,168,67,0.06)',  border:GOLD_BORDER,             color:TEXT_3 },
+    waiting: { label:'PENDING',       bg:'rgba(212,168,67,0.06)',  border:GOLD_BORDER,             color:TEXT_3 },
   }
   const c = cfg[result] || cfg.waiting
   const fs = size==='small' ? 8 : 9
@@ -296,17 +296,6 @@ function ParlaysTab({ currentUser }) {
                 </div>
 
                 {!isNoLeg && (
-                  <>
-                    {isSeasonBet ? (
-                      /* Season bet — just a text field */
-                      <textarea value={leg.bet_text||''} placeholder="Season-long bet description…"
-                        onChange={e => updateLeg(m.manager_id,'bet_text',e.target.value)}
-                        rows={2}
-                        style={{ width:'100%', padding:'7px 10px', borderRadius:8, boxSizing:'border-box',
-                          border:`0.5px solid ${GOLD_BORDER}`, background:'#252525',
-                          color:TEXT_1, fontSize:12, resize:'none', fontFamily:'inherit',
-                          marginBottom:8 }}/>
-                    ) : (
                       <>
                         {/* Player + position */}
                         <div style={{ display:'grid', gridTemplateColumns:'1fr 80px', gap:6, marginBottom:6 }}>
@@ -451,9 +440,7 @@ function ParlaysTab({ currentUser }) {
                     </div>
                     {leg.result !== 'no_leg' && (
                       <div style={{ fontSize:11, color:TEXT_2 }}>
-                        {isSeasonBet
-                          ? leg.bet_text || '—'
-                          : leg.player_name
+                        {leg.player_name
                             ? `${leg.player_name}${leg.position?` (${leg.position})`:''}`
                               + (leg.stat_count && leg.stat_op && leg.stat_type
                                 ? ` · ${leg.stat_count} ${leg.stat_op} ${leg.stat_type.replace(/_/g,' ')}`
