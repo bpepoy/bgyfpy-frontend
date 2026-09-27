@@ -47,40 +47,33 @@ function Avatar({ managerId, size=28 }) {
   )
 }
 
-function SeasonWeekNav({ season, week, seasons, onChangeSeason, onChangeWeek, maxWeek }) {
-  const [showPicker, setShowPicker] = useState(false)
+function ParlayNav({ season, week, seasons, isSeasonBet, onChangeSeason, onChangeWeek, onToggleSeasonBet }) {
+  const WEEK_OPTIONS = [
+    { value:'season_bet', label:'Season Bet' },
+    ...Array.from({length:18}, (_,i) => ({ value:i+1, label:`Week ${i+1}` }))
+  ]
   return (
-    <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:10, padding:'10px 14px 6px' }}>
-      <button onClick={() => onChangeWeek(w => Math.max(1, w-1))} disabled={week <= 1}
-        style={{ width:28, height:28, borderRadius:'50%', border:`0.5px solid ${week>1?GOLD_BORDER:'rgba(255,255,255,0.06)'}`,
-          background:BG_CARD, cursor:week>1?'pointer':'default', display:'flex', alignItems:'center',
-          justifyContent:'center', color:week>1?GOLD:TEXT_3, fontSize:14 }}>‹</button>
-      <div style={{ position:'relative' }}>
-        <button onClick={() => setShowPicker(p=>!p)}
-          style={{ display:'flex', alignItems:'center', gap:6, padding:'6px 14px', borderRadius:18,
-            border:`1px solid ${GOLD_BORDER}`, background:GOLD_DIM, cursor:'pointer',
-            fontSize:12, fontWeight:500, color:GOLD }}>
-          Week {week} · {season} <span style={{ fontSize:9, color:TEXT_2 }}>▼</span>
-        </button>
-        {showPicker && (
-          <div style={{ position:'absolute', top:'110%', left:'50%', transform:'translateX(-50%)',
-            background:'#1a1a1a', border:`0.5px solid ${GOLD_BORDER}`, borderRadius:10, zIndex:20,
-            minWidth:160, maxHeight:280, overflowY:'auto', boxShadow:'0 8px 24px rgba(0,0,0,0.6)' }}>
-            {seasons.map(s => (
-              <div key={s} style={{ padding:'8px 14px', fontSize:12, fontWeight:500,
-                color:s===season?GOLD:TEXT_2, background:s===season?GOLD_DIM:'transparent',
-                borderBottom:`0.5px solid rgba(212,168,67,0.08)`, cursor:'pointer' }}
-                onClick={() => { onChangeSeason(s); setShowPicker(false) }}>
-                Season {s}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-      <button onClick={() => onChangeWeek(w => Math.min(maxWeek||17, w+1))} disabled={week>=(maxWeek||17)}
-        style={{ width:28, height:28, borderRadius:'50%', border:`0.5px solid ${week<(maxWeek||17)?GOLD_BORDER:'rgba(255,255,255,0.06)'}`,
-          background:BG_CARD, cursor:week<(maxWeek||17)?'pointer':'default', display:'flex', alignItems:'center',
-          justifyContent:'center', color:week<(maxWeek||17)?GOLD:TEXT_3, fontSize:14 }}>›</button>
+    <div style={{ display:'flex', alignItems:'center', justifyContent:'center',
+      gap:8, padding:'8px 14px 4px' }}>
+      <select value={season||''} onChange={e => onChangeSeason(parseInt(e.target.value))}
+        style={{ padding:'6px 10px', borderRadius:10,
+          border:`1px solid ${GOLD_BORDER}`, background:BG_CARD,
+          color:GOLD, fontSize:12, fontWeight:500, cursor:'pointer' }}>
+        {(seasons||[]).map(s => <option key={s} value={s}>{s}</option>)}
+      </select>
+      <select
+        value={isSeasonBet ? 'season_bet' : (week||1)}
+        onChange={e => {
+          if (e.target.value === 'season_bet') { onToggleSeasonBet(true) }
+          else { onToggleSeasonBet(false); onChangeWeek(parseInt(e.target.value)) }
+        }}
+        style={{ padding:'6px 10px', borderRadius:10,
+          border:`1px solid ${GOLD_BORDER}`, background:BG_CARD,
+          color:GOLD, fontSize:12, fontWeight:500, cursor:'pointer' }}>
+        {WEEK_OPTIONS.map(o => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
     </div>
   )
 }
