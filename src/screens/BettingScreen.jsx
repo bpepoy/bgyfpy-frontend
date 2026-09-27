@@ -31,7 +31,7 @@ const ACTIVE_MEMBERS = [
 
 const BOTTOM_TABS = [
   { key:'parlays',    label:'Parlays',    icon:'/icons/betting-icon.png',  path:'/betting/parlays'    },
-  { key:'water-bets', label:'Water Bets', icon:'/icons/betting-icon.png',  path:'/betting/water-bets' },
+  { key:'water-bets', label:'Water Bets', icon:'/icons/water-bet-icon.png',  path:'/betting/water-bets' },
   { key:'season',     label:'Season',     icon:'/icons/season-icon.png',   path:'/betting/season'     },
   { key:'overall',    label:'Overall',    icon:'/icons/league-icon.png',   path:'/betting/overall'    },
 ]
